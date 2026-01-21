@@ -1,148 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
-    android:fillViewport="true">
+    android:background="@color/background_dark"
+    android:padding="24dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_black_arrow"
+        app:layout_constraintTop_toTopOf="@id/tvTitle"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:text="Seleccionar Fecha y Hora"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvCalendar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/card_blue"
+        app:cardCornerRadius="24dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:theme="@android:style/Theme.DeviceDefault" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tvInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HORARIOS DISPONIBLES"
+        android:textColor="@color/white"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/cvCalendar"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/slotSelected"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_btn_green"
+        android:padding="16dp"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:id="@+id/ivLogoReg"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/lynca_logo"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_clock" />
 
         <TextView
-            android:id="@+id/tvTitleReg"
+            android:id="@+id/tvTimeSlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Únete a la comunidad de Lynca"
-            android:textColor="@color/white"
-            android:textSize="20sp"
+            android:text="1:00 PM - 2:00 PM"
+            android:textColor="@color/background_dark"
             android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/ivLogoReg"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_marginStart="16dp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow2"
+            android:layout_marginLeft="155dp"/>
+    </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/cardContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_dark"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/tvTitleReg"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+    <LinearLayout
+        android:id="@+id/slotSelected3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_btn_green"
 
-            <EditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/background_input_white"
-                android:hint="Nombre"
-                android:inputType="textPersonName"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:drawableStart="@drawable/ic_user"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/text_gray"
-                android:layout_marginBottom="16dp"/>
+        android:padding="16dp"
+        android:layout_marginTop="148dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-            <EditText
-                android:id="@+id/etSurname"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/background_input_white"
-                android:hint="Apellidos"
-                android:inputType="textPersonName"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:drawableStart="@drawable/ic_user"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/text_gray"
-                android:layout_marginBottom="16dp"/>
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_clock" />
 
-            <EditText
-                android:id="@+id/etEmailReg"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/background_input_white"
-                android:hint="Correo Electrónico"
-                android:inputType="textEmailAddress"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:drawableStart="@drawable/ic_email"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/text_gray"
-                android:layout_marginBottom="16dp"/>
-
-            <EditText
-                android:id="@+id/etZipCode"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/background_input_white"
-                android:hint="Código Postal"
-                android:inputType="number"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:drawableStart="@drawable/ic_postal"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/text_gray"
-                android:layout_marginBottom="16dp"/>
-
-            <EditText
-                android:id="@+id/etPassReg"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/background_input_white"
-                android:hint="Contraseña"
-                android:inputType="textPassword"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:drawableStart="@drawable/ic_lock"
-                android:drawablePadding="12dp"
-                android:drawableTint="@color/text_gray"
-                android:layout_marginBottom="24dp"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnRegisterAction"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:background="@drawable/background_btn_green"
-                android:text="Registrarse"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textAllCaps="false"/>
-
-        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvGoToLogin"
+            android:id="@+id/tvTimeSlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="¿Ya tienes una cuenta? Iniciar Sesión"
-            android:textColor="@color/text_gray"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintTop_toBottomOf="@id/cardContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:text="1:00 PM - 2:00 PM"
+            android:textColor="@color/background_dark"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow2"
+            android:layout_marginLeft="155dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/slotSelected2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_btn_green"
+        android:padding="16dp"
+        android:layout_marginTop="79dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_clock" />
+
+        <TextView
+            android:id="@+id/tvTimeSlot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1:00 PM - 2:00 PM"
+            android:textColor="@color/background_dark"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow2"
+            android:layout_marginLeft="155dp"/>
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnContinue"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Continuar Reserva"
+        android:background="@drawable/background_btn_green"
+        android:textColor="@color/background_dark"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
