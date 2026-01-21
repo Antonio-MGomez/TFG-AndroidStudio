@@ -131,18 +131,35 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvGoToLogin"
+        <LinearLayout
+            android:id="@+id/llFooter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="¿Ya tienes una cuenta? Iniciar Sesión"
-            android:textColor="@color/text_gray"
+            android:orientation="horizontal"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/cardContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿Ya tienes una cuenta? "
+                android:textColor="@color/text_gray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/tvGoToLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Iniciar Sesión"
+                android:textColor="@color/accent_green"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
