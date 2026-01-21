@@ -74,7 +74,6 @@
             android:src="@drawable/ic_clock" />
 
         <TextView
-            android:id="@+id/tvTimeSlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1:00 PM - 2:00 PM"
@@ -108,7 +107,6 @@
 
 
         <TextView
-            android:id="@+id/tvTimeSlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1:00 PM - 2:00 PM"
@@ -140,7 +138,6 @@
             android:src="@drawable/ic_clock" />
 
         <TextView
-            android:id="@+id/tvTimeSlot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1:00 PM - 2:00 PM"
@@ -167,5 +164,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

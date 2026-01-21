@@ -21,8 +21,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".vista.CalendarioActivity"
-        </activity>
+            android:name=".vista.CalendarioActivity" />
+
 
         <activity android:name=".vista.RegisterActivity" />
 
