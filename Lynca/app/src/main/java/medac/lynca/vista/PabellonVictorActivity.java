@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 import java.util.ArrayList;
 import java.util.List;
 import medac.lynca.R;
@@ -22,31 +23,44 @@ public class PabellonVictorActivity extends AppCompatActivity implements
     private TextView tvPriceMain;
     private List<DateModel> dateList;
     private List<TimeSlotModel> hourList;
+    private ViewPager2 viewPagerHeader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pabellon_victor);
 
-        // Vinculación
         rvDates = findViewById(R.id.rvDates);
         rvHours = findViewById(R.id.rvHours);
         tvPriceMain = findViewById(R.id.tvPriceMain);
+        viewPagerHeader = findViewById(R.id.viewPagerHeader);
 
-        // Acción del botón calendario
+        // 1. Configurar carrusel con las imágenes de baloncesto
+        setupImageSlider();
+
         findViewById(R.id.btnCalendarShortcut).setOnClickListener(v ->
                 Toast.makeText(this, "Redirigiendo al calendario...", Toast.LENGTH_SHORT).show());
 
         setupDates();
-        // Carga inicial con el multiplicador del primer día (Lunes = 1.0)
-        updateHoursAndPrice(dateList.get(0).getPriceMultiplier());
+
+        // Carga inicial: Lunes (posición 0)
+        updateHoursAndPrice(dateList.get(0).getDayNumber(), dateList.get(0).getPriceMultiplier());
+    }
+
+    private void setupImageSlider() {
+        List<Integer> images = new ArrayList<>();
+        images.add(R.drawable.pista_baloncesto_1);
+        images.add(R.drawable.pista_baloncesto_2);
+
+        ImageSliderAdapter adapter = new ImageSliderAdapter(images);
+        viewPagerHeader.setAdapter(adapter);
     }
 
     private void setupDates() {
         dateList = new ArrayList<>();
         dateList.add(new DateModel("Lunes", 15, true, 1.0));
         dateList.add(new DateModel("Martes", 16, false, 1.0));
-        dateList.add(new DateModel("Miérc", 17, false, 1.25)); // 25% más caro
+        dateList.add(new DateModel("Miérc", 17, false, 1.25));
         dateList.add(new DateModel("Jueves", 18, false, 1.0));
 
         dateAdapter = new DateAdapter(dateList, this);
@@ -56,37 +70,39 @@ public class PabellonVictorActivity extends AppCompatActivity implements
 
     @Override
     public void onDateClick(int position) {
-        // Cambiar selección visual de días
         for (int i = 0; i < dateList.size(); i++) dateList.get(i).setSelected(i == position);
         dateAdapter.notifyDataSetChanged();
 
-        // Actualizar horas con los nuevos precios del día
-        updateHoursAndPrice(dateList.get(position).getPriceMultiplier());
+        // Pasamos el número de día para variar las reservas
+        updateHoursAndPrice(dateList.get(position).getDayNumber(), dateList.get(position).getPriceMultiplier());
     }
 
     @Override
     public void onHourClick(int position) {
-        // Cambiar selección visual de horas (Poner en azul)
         for (int i = 0; i < hourList.size(); i++) hourList.get(i).setSelected(i == position);
         hourAdapter.notifyDataSetChanged();
 
-        // Actualizar el precio grande de la barra inferior
         String nuevoPrecio = hourList.get(position).getPrice();
         tvPriceMain.setText(nuevoPrecio.contains("€") ? nuevoPrecio : "€" + nuevoPrecio);
     }
 
-    private void updateHoursAndPrice(double multiplier) {
+    private void updateHoursAndPrice(int dayNumber, double multiplier) {
         int precioBase = 48;
         int precioCalculado = (int) (precioBase * multiplier);
-
-        // El precio inferior por defecto es el de la primera hora
         tvPriceMain.setText("€" + precioCalculado);
 
         hourList = new ArrayList<>();
-        hourList.add(new TimeSlotModel("18:00", "€" + precioCalculado, false));
-        hourList.add(new TimeSlotModel("19:00", "€" + precioCalculado, false));
-        hourList.add(new TimeSlotModel("20:00", "€" + precioCalculado, false));
-        hourList.add(new TimeSlotModel("21:00", "Reservada", true));
+
+        // Lógica para variar qué hora está reservada según el día (Lunes=15, Martes=16...)
+        // Lunes: 21:00 Reservada
+        // Martes: 18:00 Reservada
+        // Miércoles: 19:00 Reservada
+        // Jueves: 20:00 Reservada
+
+        hourList.add(new TimeSlotModel("18:00", "€" + precioCalculado, dayNumber == 16));
+        hourList.add(new TimeSlotModel("19:00", "€" + precioCalculado, dayNumber == 17));
+        hourList.add(new TimeSlotModel("20:00", "€" + precioCalculado, dayNumber == 18));
+        hourList.add(new TimeSlotModel("21:00", "€" + precioCalculado, dayNumber == 15));
         hourList.add(new TimeSlotModel("22:00", "€" + (int)(55 * multiplier), false));
 
         hourAdapter = new HourAdapter(hourList, this);
