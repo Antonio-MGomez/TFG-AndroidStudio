@@ -1,17 +1,24 @@
 package medac.lynca.vista;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import medac.lynca.R;
 import medac.lynca.vista.model.DateModel;
+import medac.lynca.vista.model.ReservationModel;
+import medac.lynca.vista.model.ReservationRepository;
 import medac.lynca.vista.model.TimeSlotModel;
 
 public class PabellonVictorActivity extends AppCompatActivity implements
@@ -24,6 +31,7 @@ public class PabellonVictorActivity extends AppCompatActivity implements
     private List<DateModel> dateList;
     private List<TimeSlotModel> hourList;
     private ViewPager2 viewPagerHeader;
+    private String selectedDayLabel = "Lunes 15";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,34 +42,57 @@ public class PabellonVictorActivity extends AppCompatActivity implements
         rvHours = findViewById(R.id.rvHours);
         tvPriceMain = findViewById(R.id.tvPriceMain);
         viewPagerHeader = findViewById(R.id.viewPagerHeader);
+        Button btnReservar = findViewById(R.id.btnReservar);
 
-        // 1. Configurar carrusel con las imágenes de baloncesto
         setupImageSlider();
-
-        findViewById(R.id.btnCalendarShortcut).setOnClickListener(v ->
-                Toast.makeText(this, "Redirigiendo al calendario...", Toast.LENGTH_SHORT).show());
-
         setupDates();
 
-        // Carga inicial: Lunes (posición 0)
-        updateHoursAndPrice(dateList.get(0).getDayNumber(), dateList.get(0).getPriceMultiplier());
+        // --- ENLACE CON EL CALENDARIO DE TU AMIGO ---
+        findViewById(R.id.btnCalendarShortcut).setOnClickListener(v -> {
+            // Usamos un Intent para viajar de esta pantalla a CalendarioActivity
+            Intent intent = new Intent(PabellonVictorActivity.this, CalendarioActivity.class);
+            startActivity(intent);
+        });
+
+        btnReservar.setOnClickListener(v -> {
+            String hora = "";
+            for (TimeSlotModel slot : hourList) {
+                if (slot.isSelected()) { hora = slot.getTime(); break; }
+            }
+
+            if (hora.isEmpty()) {
+                Toast.makeText(this, "Por favor, selecciona una hora", Toast.LENGTH_SHORT).show();
+            } else {
+                ReservationModel nueva = new ReservationModel(
+                        "Pabellón número cinco",
+                        selectedDayLabel + ", " + hora,
+                        "pista_baloncesto_1",
+                        "Confirmada"
+                );
+                ReservationRepository.getInstance().addReservation(nueva);
+                startActivity(new Intent(this, ProfileActivity.class));
+            }
+        });
+
+        updateHoursAndPrice(15, 1.0);
     }
 
     private void setupImageSlider() {
-        List<Integer> images = new ArrayList<>();
-        images.add(R.drawable.pista_baloncesto_1);
-        images.add(R.drawable.pista_baloncesto_2);
-
-        ImageSliderAdapter adapter = new ImageSliderAdapter(images);
-        viewPagerHeader.setAdapter(adapter);
+        List<Integer> imgs = new ArrayList<>();
+        imgs.add(R.drawable.pista_baloncesto_1);
+        imgs.add(R.drawable.pista_baloncesto_2);
+        viewPagerHeader.setAdapter(new ImageSliderAdapter(imgs));
     }
 
     private void setupDates() {
         dateList = new ArrayList<>();
         dateList.add(new DateModel("Lunes", 15, true, 1.0));
         dateList.add(new DateModel("Martes", 16, false, 1.0));
-        dateList.add(new DateModel("Miérc", 17, false, 1.25));
+        dateList.add(new DateModel("Miérc", 17, false, 1.2));
         dateList.add(new DateModel("Jueves", 18, false, 1.0));
+        dateList.add(new DateModel("Viernes", 19, false, 1.3));
+        dateList.add(new DateModel("Sábado", 20, false, 1.5));
+        dateList.add(new DateModel("Domingo", 21, false, 1.5));
 
         dateAdapter = new DateAdapter(dateList, this);
         rvDates.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -69,41 +100,39 @@ public class PabellonVictorActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDateClick(int position) {
-        for (int i = 0; i < dateList.size(); i++) dateList.get(i).setSelected(i == position);
+    public void onDateClick(int pos) {
+        for(int i=0; i<dateList.size(); i++) dateList.get(i).setSelected(i==pos);
         dateAdapter.notifyDataSetChanged();
-
-        // Pasamos el número de día para variar las reservas
-        updateHoursAndPrice(dateList.get(position).getDayNumber(), dateList.get(position).getPriceMultiplier());
+        selectedDayLabel = dateList.get(pos).getDayName() + " " + dateList.get(pos).getDayNumber();
+        updateHoursAndPrice(dateList.get(pos).getDayNumber(), dateList.get(pos).getPriceMultiplier());
     }
 
     @Override
-    public void onHourClick(int position) {
-        for (int i = 0; i < hourList.size(); i++) hourList.get(i).setSelected(i == position);
-        hourAdapter.notifyDataSetChanged();
-
-        String nuevoPrecio = hourList.get(position).getPrice();
-        tvPriceMain.setText(nuevoPrecio.contains("€") ? nuevoPrecio : "€" + nuevoPrecio);
+    public void onHourClick(int pos) {
+        if(!hourList.get(pos).isReserved()){
+            for(int i=0; i<hourList.size(); i++) hourList.get(i).setSelected(i==pos);
+            hourAdapter.notifyDataSetChanged();
+            tvPriceMain.setText(hourList.get(pos).getPrice());
+        } else {
+            Toast.makeText(this, "Esta hora no está disponible", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void updateHoursAndPrice(int dayNumber, double multiplier) {
-        int precioBase = 48;
-        int precioCalculado = (int) (precioBase * multiplier);
-        tvPriceMain.setText("€" + precioCalculado);
-
+    private void updateHoursAndPrice(int day, double mult) {
+        int base = (int)(48 * mult);
+        tvPriceMain.setText("€" + base);
         hourList = new ArrayList<>();
 
-        // Lógica para variar qué hora está reservada según el día (Lunes=15, Martes=16...)
-        // Lunes: 21:00 Reservada
-        // Martes: 18:00 Reservada
-        // Miércoles: 19:00 Reservada
-        // Jueves: 20:00 Reservada
+        boolean esFinDeSemana = (day == 20 || day == 21);
+        String[] horas = {"09:00", "10:00", "11:00", "12:00", "13:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"};
 
-        hourList.add(new TimeSlotModel("18:00", "€" + precioCalculado, dayNumber == 16));
-        hourList.add(new TimeSlotModel("19:00", "€" + precioCalculado, dayNumber == 17));
-        hourList.add(new TimeSlotModel("20:00", "€" + precioCalculado, dayNumber == 18));
-        hourList.add(new TimeSlotModel("21:00", "€" + precioCalculado, dayNumber == 15));
-        hourList.add(new TimeSlotModel("22:00", "€" + (int)(55 * multiplier), false));
+        for (String h : horas) {
+            boolean reservada = esFinDeSemana ||
+                    (day == 15 && h.equals("21:00")) ||
+                    (day == 16 && h.equals("18:00")) ||
+                    (day == 17 && h.equals("19:00"));
+            hourList.add(new TimeSlotModel(h, "€" + base, reservada));
+        }
 
         hourAdapter = new HourAdapter(hourList, this);
         rvHours.setLayoutManager(new GridLayoutManager(this, 3));
