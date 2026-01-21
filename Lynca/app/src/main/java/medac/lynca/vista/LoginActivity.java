@@ -1,6 +1,7 @@
 package medac.lynca.vista;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +16,8 @@ public class LoginActivity extends AppCompatActivity {
 
     // Declarar variables
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnGoogle;
-    private TextView tvForgotPassword, tvRegister;
+    private Button btnLogin, btnGoogle, btnRegister;
+    private TextView tvForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         btnGoogle = findViewById(R.id.btnGoogle);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        tvRegister = findViewById(R.id.tvRegister);
+        btnRegister = findViewById(R.id.btnRegisterAction);
 
         // 2. Acción botón Login
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -56,10 +57,12 @@ public class LoginActivity extends AppCompatActivity {
         // 4. Acción Registrarse (Texto coloreado)
         // Opcional: Para poner "Regístrate" en verde mediante código o XML,
         // aquí simplemente detectamos el clic.
-        tvRegister.setOnClickListener(new View.OnClickListener() {
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Ir a Registro", Toast.LENGTH_SHORT).show();
+                // El "Intent" es la intención de cambiar de pantalla
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
     }
