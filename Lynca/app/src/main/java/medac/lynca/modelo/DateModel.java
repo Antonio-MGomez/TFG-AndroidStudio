@@ -1,4 +1,4 @@
-package medac.lynca.vista.model;
+package medac.lynca.modelo;
 
 public class DateModel {
     private String dayName;

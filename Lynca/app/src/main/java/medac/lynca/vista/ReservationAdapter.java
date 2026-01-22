@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import medac.lynca.R;
-import medac.lynca.vista.model.ReservationModel;
+import medac.lynca.modelo.ReservationModel;
 
 public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.ViewHolder> {
 

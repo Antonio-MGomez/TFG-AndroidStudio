@@ -5,15 +5,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 import medac.lynca.R;
-import medac.lynca.vista.model.ReservationModel;
-import medac.lynca.vista.model.ReservationRepository;
+import medac.lynca.modelo.ReservationModel;
+import medac.lynca.modelo.ReservationRepository;
 
 public class ProfileActivity extends AppCompatActivity {
 
