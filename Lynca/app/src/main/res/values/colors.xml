@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary_blue">#3F51B5</color>
+    <color name="light_blue_bg">#B3E5FC</color>
+    <color name="text_dark">#1A237E</color>
+    <color name="rating_gold">#FFD700</color>
+    <color name="promo_green">#2E7D32</color>
+    <color name="button_gradient_start">#7E57C2</color>
+    <color name="button_gradient_end">#5C6BC0</color>
     <color name="background_dark">#0A0E31</color>
     <color name="card_blue">#3E5481</color>
     <color name="neon_green">#2CFD88</color>
@@ -13,4 +20,11 @@
 
     <color name="bg_dark">#2D2432</color> <color name="accent_green">#5CD688</color> <color name="text_gray">#8A8A8A</color>
     <color name="bg_google">#1A1F1C</color>
+
+    <color name="secondary_blue">#1A237E</color>      <color name="link_blue">#2196F3</color>         <color name="rating_fold">#FFD700</color>       <color name="text_sec">#757575</color>          <color name="promo_freen">#2E7D32</color>       <color name="bg_light">#F7F7F7</color>          <color name="reserved_red">#F44336</color>      <color name="grad_start">#7E78D2</color>
+    <color name="grad_end">#5C6BC0</color>
+    <color name="purple_gradient_start">#9C27B0</color> <color name="blue_gradient_end">#3F51B5</color>
+    <color name="boton_inicio_fusion">#7E78D2</color>
+    <color name="boton_fin_fusion">#5C6BC0</color>
+
 </resources>

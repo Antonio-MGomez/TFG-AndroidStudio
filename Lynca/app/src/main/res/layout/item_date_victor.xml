@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardDate"
+    android:layout_width="80dp"
+    android:layout_height="95dp"
+    android:layout_margin="6dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="3dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvDayName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lunes"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/tvDayNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="15"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

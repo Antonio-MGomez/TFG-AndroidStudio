@@ -11,22 +11,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lynca">
+
         <activity
             android:name=".vista.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".vista.CalendarioActivity"
-            android:exported="true"/>
 
-
+        <activity android:name=".vista.CalendarioActivity" android:exported="true"/>
         <activity android:name=".vista.RegisterActivity" />
+        <activity android:name=".vista.PabellonVictorActivity" android:exported="true" />
+        <activity android:name=".vista.PabellonInfoActivity" android:exported="true" />
+
+        <activity android:name=".vista.ProfileActivity" android:exported="true" />
 
     </application>
-
 </manifest>
