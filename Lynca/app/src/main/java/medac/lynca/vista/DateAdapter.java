@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import java.util.List;
 import medac.lynca.R;
-import medac.lynca.vista.model.DateModel;
+import medac.lynca.modelo.DateModel;
 
 public class DateAdapter extends RecyclerView.Adapter<DateAdapter.DateViewHolder> {
 

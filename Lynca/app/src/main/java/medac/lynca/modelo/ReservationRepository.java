@@ -1,4 +1,4 @@
-package medac.lynca.vista.model;
+package medac.lynca.modelo;
 
 import java.util.ArrayList;
 import java.util.List;

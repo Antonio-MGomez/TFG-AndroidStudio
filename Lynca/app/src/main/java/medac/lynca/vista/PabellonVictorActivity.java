@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import medac.lynca.R;
-import medac.lynca.vista.model.DateModel;
-import medac.lynca.vista.model.ReservationModel;
-import medac.lynca.vista.model.ReservationRepository;
-import medac.lynca.vista.model.TimeSlotModel;
+import medac.lynca.modelo.DateModel;
+import medac.lynca.modelo.ReservationModel;
+import medac.lynca.modelo.ReservationRepository;
+import medac.lynca.modelo.TimeSlotModel;
 
 public class PabellonVictorActivity extends AppCompatActivity implements
         DateAdapter.OnDateClickListener, HourAdapter.OnHourClickListener {
