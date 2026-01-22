@@ -23,6 +23,7 @@
 
         <activity android:name=".vista.CalendarioActivity" android:exported="true"/>
         <activity android:name=".vista.RegisterActivity" />
+        <activity android:name=".vista.RecuperarContrasenaActivity"/>
         <activity android:name=".vista.PabellonVictorActivity" android:exported="true" />
         <activity android:name=".vista.PabellonInfoActivity" android:exported="true" />
 
