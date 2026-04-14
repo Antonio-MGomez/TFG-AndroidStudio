@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -23,7 +24,7 @@
                 android:id="@+id/viewPagerHeader"
                 android:layout_width="match_parent"
                 android:layout_height="280dp"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <LinearLayout
                 android:id="@+id/layoutIndicators"
@@ -34,8 +35,12 @@
                 app:layout_constraintBottom_toBottomOf="@id/viewPagerHeader"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
-                <ImageView android:layout_width="8dp" android:layout_height="8dp" android:layout_margin="4dp" android:src="@drawable/ic_launcher_background" app:tint="@color/white"/>
-                <ImageView android:layout_width="8dp" android:layout_height="8dp" android:layout_margin="4dp" android:src="@drawable/ic_launcher_background" app:tint="#80FFFFFF"/>
+                <ImageView android:layout_width="8dp" android:layout_height="8dp"
+                    android:layout_margin="4dp" android:src="@drawable/ic_launcher_background"
+                    app:tint="@color/white"/>
+                <ImageView android:layout_width="8dp" android:layout_height="8dp"
+                    android:layout_margin="4dp" android:src="@drawable/ic_launcher_background"
+                    app:tint="#80FFFFFF"/>
             </LinearLayout>
 
             <TextView
@@ -49,7 +54,7 @@
                 android:textSize="32sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/viewPagerHeader" />
+                app:layout_constraintTop_toBottomOf="@id/viewPagerHeader"/>
 
             <LinearLayout
                 android:id="@+id/layoutRating"
@@ -60,9 +65,15 @@
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvTitle">
-                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@android:drawable/btn_star_big_on" app:tint="@color/rating_gold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="4.8" android:textStyle="bold" android:textColor="#000000" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="123 Reviews" android:textColor="@color/text_sec" />
+                <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                    android:src="@android:drawable/btn_star_big_on"
+                    app:tint="@color/rating_gold"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp" android:text="4.8"
+                    android:textStyle="bold" android:textColor="#000000"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp" android:text="123 Reviews"
+                    android:textColor="@color/text_sec"/>
             </LinearLayout>
 
             <TextView
@@ -76,7 +87,7 @@
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layoutRating" />
+                app:layout_constraintTop_toBottomOf="@id/layoutRating"/>
 
             <LinearLayout
                 android:id="@+id/layoutDatesRow"
@@ -95,7 +106,7 @@
                     android:layout_weight="1"
                     android:paddingStart="12dp"
                     android:orientation="horizontal"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/btnCalendarShortcut"
@@ -112,7 +123,7 @@
                         android:layout_height="match_parent"
                         android:padding="22dp"
                         android:src="@android:drawable/ic_menu_my_calendar"
-                        app:tint="@color/black" />
+                        app:tint="@color/black"/>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
@@ -127,7 +138,7 @@
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layoutDatesRow" />
+                app:layout_constraintTop_toBottomOf="@id/layoutDatesRow"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHours"
@@ -139,11 +150,12 @@
                 android:paddingBottom="20dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
-                app:layout_constraintTop_toBottomOf="@id/tvHoursLabel" />
+                app:layout_constraintTop_toBottomOf="@id/tvHoursLabel"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- FOOTER PRECIO + BOTÓN -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutFooter"
         android:layout_width="match_parent"
@@ -151,7 +163,7 @@
         android:background="@color/white"
         android:elevation="20dp"
         android:padding="20dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/bottomNav">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -160,7 +172,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="bottom">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom">
                 <TextView
                     android:id="@+id/tvPriceMain"
                     android:layout_width="wrap_content"
@@ -168,7 +183,7 @@
                     android:text="€48"
                     android:textColor="#000000"
                     android:textSize="36sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -176,7 +191,7 @@
                     android:layout_marginBottom="6dp"
                     android:text="/ hora"
                     android:textColor="@color/text_sec"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -196,6 +211,64 @@
             android:stateListAnimator="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- BOTTOM NAV -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout android:id="@+id/navHome"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_compass"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Home" android:textSize="11sp" android:textColor="#6B7280"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/navSearch"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_search"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Search" android:textSize="11sp" android:textColor="#1E4DB7"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/navBookings"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_agenda"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Bookings" android:textSize="11sp" android:textColor="#6B7280"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/navProfile"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_myplaces"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Profile" android:textSize="11sp" android:textColor="#6B7280"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

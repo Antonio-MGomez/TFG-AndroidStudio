@@ -2,59 +2,148 @@ package medac.lynca.vista;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.UUID;
+
 import medac.lynca.R;
+import medac.lynca.modelo.SessionManager;
+import medac.lynca.modelo.SupabaseClient;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    // Variables para controlar tus campos
     private EditText etName, etSurname, etEmail, etZip, etPass;
-    private Button btnRegister;
+    private Button   btnRegister;
     private TextView tvGoToLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // ESTA LÍNEA ES LA CLAVE: Conecta este cerebro con tu diseño visual
         setContentView(R.layout.activity_register);
 
-        // 1. Vincular las variables con los IDs de tu XML
-        etName = findViewById(R.id.etName);
-        etSurname = findViewById(R.id.etSurname);
-        etEmail = findViewById(R.id.etEmailReg);
-        etZip = findViewById(R.id.etZipCode);
-        etPass = findViewById(R.id.etPassReg);
+        etName      = findViewById(R.id.etName);
+        etSurname   = findViewById(R.id.etSurname);
+        etEmail     = findViewById(R.id.etEmailReg);
+        etZip       = findViewById(R.id.etZipCode);
+        etPass      = findViewById(R.id.etPassReg);
         btnRegister = findViewById(R.id.btnRegisterAction);
         tvGoToLogin = findViewById(R.id.tvGoToLogin);
 
-        // 2. Programar el botón de Registrarse
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Aquí validamos si los campos están vacíos
-                if(etName.getText().toString().isEmpty() || etPass.getText().toString().isEmpty()){
-                    Toast.makeText(RegisterActivity.this, "Faltan datos", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(RegisterActivity.this, "¡Registro Exitoso!", Toast.LENGTH_SHORT).show();
-                    // Aquí en el futuro guardarás los datos en la base de datos
-                }
+        btnRegister.setOnClickListener(v -> {
+            String nombre    = etName.getText().toString().trim();
+            String apellidos = etSurname.getText().toString().trim();
+            String email     = etEmail.getText().toString().trim();
+            String pass      = etPass.getText().toString().trim();
+
+            if (nombre.isEmpty())    { etName.setError("Campo obligatorio");    return; }
+            if (apellidos.isEmpty()) { etSurname.setError("Campo obligatorio"); return; }
+            if (email.isEmpty())     { etEmail.setError("Campo obligatorio");   return; }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                etEmail.setError("Email no válido"); return;
+            }
+            if (pass.isEmpty())    { etPass.setError("Campo obligatorio");   return; }
+            if (pass.length() < 6) { etPass.setError("Mínimo 6 caracteres"); return; }
+
+            btnRegister.setEnabled(false);
+            btnRegister.setText("Registrando...");
+
+            String nombreCompleto = nombre + " " + apellidos;
+
+            // Generar UUID para el perfil
+            String nuevoId = UUID.randomUUID().toString();
+
+            try {
+                JSONObject perfil = new JSONObject();
+                perfil.put("id",             nuevoId);
+                perfil.put("email",          email);
+                perfil.put("password",       pass);
+                perfil.put("nombre_completo",nombreCompleto);
+                perfil.put("rol", "USER");
+                perfil.put("esta_baneado",   false);
+
+                // Llamada directa a REST sin auth
+                new Thread(() -> {
+                    try {
+                        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                        okhttp3.MediaType JSON = okhttp3.MediaType.get("application/json");
+                        okhttp3.Request req = new okhttp3.Request.Builder()
+                                .url(medac.lynca.modelo.SupabaseConfig.REST_URL + "/perfiles")
+                                .addHeader("apikey", medac.lynca.modelo.SupabaseConfig.ANON_KEY)
+                                .addHeader("Content-Type", "application/json")
+                                .addHeader("Prefer", "return=representation")
+                                .post(okhttp3.RequestBody.create(perfil.toString(), JSON))
+                                .build();
+
+                        okhttp3.Response response = client.newCall(req).execute();
+                        String body = response.body() != null ? response.body().string() : "[]";
+
+                        runOnUiThread(() -> {
+                            btnRegister.setEnabled(true);
+                            btnRegister.setText("Registrarse");
+
+                            if (response.isSuccessful()) {
+                                try {
+                                    JSONArray arr = new JSONArray(body);
+                                    if (arr.length() > 0) {
+                                        JSONObject p = arr.getJSONObject(0);
+                                        String pid    = p.getString("id");
+                                        String pemail = p.getString("email");
+                                        String pnombre= p.optString("nombre_completo","Usuario");
+                                        SessionManager.getInstance(RegisterActivity.this)
+                                                .saveSession(pid, pemail, pnombre);
+                                        startActivity(new Intent(RegisterActivity.this,
+                                                HomeActivity.class));
+                                        finish();
+                                    }
+                                } catch (Exception ex) {
+                                    Toast.makeText(RegisterActivity.this,
+                                            "Registro completado. Inicia sesión.",
+                                            Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(RegisterActivity.this,
+                                            LoginActivity.class));
+                                    finish();
+                                }
+                            } else {
+                                if (body.contains("duplicate") || body.contains("unique")) {
+                                    Toast.makeText(RegisterActivity.this,
+                                            "Este email ya está registrado",
+                                            Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(RegisterActivity.this,
+                                            "Error: " + body,
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+
+                    } catch (Exception ex) {
+                        runOnUiThread(() -> {
+                            btnRegister.setEnabled(true);
+                            btnRegister.setText("Registrarse");
+                            Toast.makeText(RegisterActivity.this,
+                                    "Error de conexión", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }).start();
+
+            } catch (Exception e) {
+                btnRegister.setEnabled(true);
+                btnRegister.setText("Registrarse");
+                Toast.makeText(this, "Error inesperado", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 3. Programar el botón "Ya tengo cuenta" (Volver al Login)
-        tvGoToLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish(); // Cierra el registro
-            }
+        tvGoToLogin.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         });
     }
 }

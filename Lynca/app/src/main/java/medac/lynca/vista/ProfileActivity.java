@@ -1,80 +1,255 @@
 package medac.lynca.vista;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import medac.lynca.R;
 import medac.lynca.modelo.ReservationModel;
-import medac.lynca.modelo.ReservationRepository;
+import medac.lynca.modelo.SessionManager;
+import medac.lynca.modelo.SupabaseClient;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private RecyclerView rv;
+    private RecyclerView       rv;
     private ReservationAdapter adapter;
-    private Button btnReservadas, btnPasadas;
+    private Button             btnReservadas, btnPasadas;
+
+    private final List<ReservationModel> activeList = new ArrayList<>();
+    private final List<ReservationModel> pastList   = new ArrayList<>();
+    private boolean showingActive = true;
+
+    // Mapa de IDs de pistas a nombres legibles
+    private String getNombrePista(String pistaId) {
+        if (pistaId == null) return "Instalación";
+        switch (pistaId) {
+            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf":
+                return "Pista Tenis";
+            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a":
+                return "Pista Pádel 1";
+            case "d3304f3d-c511-41fd-a65f-027566151951":
+                return "Pista Pádel 2";
+            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de":
+                return "Pista Fútbol Sala";
+            default:
+                return "Instalación deportiva";
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        rv = findViewById(R.id.rvReservations);
+        rv            = findViewById(R.id.rvReservations);
         btnReservadas = findViewById(R.id.tabReservadas);
-        btnPasadas = findViewById(R.id.tabPasadas);
+        btnPasadas    = findViewById(R.id.tabPasadas);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        // Carga inicial (Reservadas)
-        loadReservations(true);
+        // Mostrar nombre y email
+        SessionManager session = SessionManager.getInstance(this);
+        TextView tvName  = findViewById(R.id.tvProfileName);
+        TextView tvEmail = findViewById(R.id.tvProfileEmail);
+        if (tvName  != null) tvName.setText(session.getNombre());
+        if (tvEmail != null) tvEmail.setText(session.getEmail());
 
-        btnReservadas.setOnClickListener(v -> loadReservations(true));
-        btnPasadas.setOnClickListener(v -> loadReservations(false));
+        btnReservadas.setOnClickListener(v -> mostrarLista(true));
+        btnPasadas.setOnClickListener(v    -> mostrarLista(false));
+
+        BottomNavHelper.setup(this, "profile");
+
+        cargarReservas();
     }
 
-    private void loadReservations(boolean active) {
-        // Colores fijos
-        int colorBlanco = Color.WHITE;
-        int colorGrisFondo = Color.parseColor("#DDDDDD"); // El color del contenedor
-        int colorNegro = Color.BLACK;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cargarReservas();
+    }
 
-        // Lógica de intercambio de botones (Letras siempre negras)
-        if (active) {
-            // RESERVADAS seleccionado
-            btnReservadas.setBackgroundTintList(ColorStateList.valueOf(colorBlanco));
-            btnReservadas.setTextColor(colorNegro);
+    private void cargarReservas() {
+        SessionManager session = SessionManager.getInstance(this);
+        String perfilId        = session.getPerfilId();
 
-            // PASADAS apagado (se vuelve gris)
-            btnPasadas.setBackgroundTintList(ColorStateList.valueOf(colorGrisFondo));
-            btnPasadas.setTextColor(colorNegro);
-        } else {
-            // RESERVADAS apagado (se vuelve gris)
-            btnReservadas.setBackgroundTintList(ColorStateList.valueOf(colorGrisFondo));
-            btnReservadas.setTextColor(colorNegro);
-
-            // PASADAS seleccionado
-            btnPasadas.setBackgroundTintList(ColorStateList.valueOf(colorBlanco));
-            btnPasadas.setTextColor(colorNegro);
+        if (perfilId == null) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
         }
 
-        // Cargar lista (Pasadas o Reservadas)
-        List<ReservationModel> data = active ?
-                ReservationRepository.getInstance().getActive() :
-                ReservationRepository.getInstance().getPast();
+        SupabaseClient.getInstance().getReservas(perfilId,
+                new SupabaseClient.Callback() {
+                    @Override
+                    public void onSuccess(String body) {
+                        procesarReservas(body);
+                    }
 
-        // El adaptador ocultará el botón cancelar si es una pista pasada
-        adapter = new ReservationAdapter(data, position -> {
-            if (active) {
-                ReservationRepository.getInstance().removeReservation(position);
-                loadReservations(true);
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(ProfileActivity.this,
+                                "No se pudieron cargar las reservas",
+                                Toast.LENGTH_SHORT).show();
+                        mostrarLista(showingActive);
+                    }
+                });
+    }
+
+    private void procesarReservas(String body) {
+        activeList.clear();
+        pastList.clear();
+
+        try {
+            JSONArray arr = new JSONArray(body);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj    = arr.getJSONObject(i);
+                String estado     = obj.optString("estado_reserva", "Pendiente");
+                String fecha      = obj.optString("fecha_reserva", "");
+                String horaInicio = obj.optString("hora_inicio", "");
+                String horaFin    = obj.optString("hora_fin", "");
+                String pistaId    = obj.optString("pista_id", "");
+
+                // Nombre legible de la pista
+                String pistaNombre = getNombrePista(pistaId);
+
+                // Formato de tiempo limpio
+                String timeStr = fecha + "  " + horaInicio + " - " + horaFin;
+
+                // Imagen según tipo de pista
+                String imgNombre = getImagenPorPista(pistaId);
+
+                ReservationModel res = new ReservationModel(
+                        0L,
+                        pistaNombre,
+                        timeStr,
+                        imgNombre,
+                        estado
+                );
+
+                if ("Confirmada".equalsIgnoreCase(estado)
+                        || "Pendiente".equalsIgnoreCase(estado)) {
+                    activeList.add(res);
+                } else {
+                    pastList.add(res);
+                }
             }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error procesando datos",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        mostrarLista(showingActive);
+    }
+
+    private String getImagenPorPista(String pistaId) {
+        if (pistaId == null) return "pista_baloncesto_1";
+        switch (pistaId) {
+            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf":
+                return "pista_tenis";
+            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a":
+            case "d3304f3d-c511-41fd-a65f-027566151951":
+                return "pista_padel";
+            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de":
+                return "pista_baloncesto_1";
+            default:
+                return "pista_baloncesto_1";
+        }
+    }
+
+    private void mostrarLista(boolean active) {
+        showingActive = active;
+
+        if (active) {
+            btnReservadas.setBackgroundTintList(
+                    ColorStateList.valueOf(Color.WHITE));
+            btnPasadas.setBackgroundTintList(
+                    ColorStateList.valueOf(Color.parseColor("#DDDDDD")));
+        } else {
+            btnReservadas.setBackgroundTintList(
+                    ColorStateList.valueOf(Color.parseColor("#DDDDDD")));
+            btnPasadas.setBackgroundTintList(
+                    ColorStateList.valueOf(Color.WHITE));
+        }
+        btnReservadas.setTextColor(Color.BLACK);
+        btnPasadas.setTextColor(Color.BLACK);
+
+        List<ReservationModel> data = active ? activeList : pastList;
+        adapter = new ReservationAdapter(data, position -> {
+            if (active) cancelarReserva(data.get(position));
         });
         rv.setAdapter(adapter);
+    }
+
+    private void cancelarReserva(ReservationModel reserva) {
+        // Como no tenemos el ID de la reserva guardado,
+        // recargamos la lista desde Supabase para obtenerlo
+        SessionManager session = SessionManager.getInstance(this);
+        String perfilId        = session.getPerfilId();
+
+        SupabaseClient.getInstance().getReservas(perfilId,
+                new SupabaseClient.Callback() {
+                    @Override
+                    public void onSuccess(String body) {
+                        try {
+                            JSONArray arr = new JSONArray(body);
+                            // Cancelar la primera reserva que coincida
+                            for (int i = 0; i < arr.length(); i++) {
+                                JSONObject obj = arr.getJSONObject(i);
+                                String fecha   = obj.optString("fecha_reserva","");
+                                String hora    = obj.optString("hora_inicio","");
+                                String timeStr = fecha + "  " + hora;
+
+                                if (reserva.getTime().contains(fecha)
+                                        && reserva.getTime().contains(hora)) {
+                                    String reservaId = obj.getString("id");
+                                    eliminarReserva(reservaId);
+                                    break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(ProfileActivity.this,
+                                    "Error al cancelar", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(ProfileActivity.this,
+                                "No se pudo cancelar", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void eliminarReserva(String reservaId) {
+        String token = SessionManager.getInstance(this).getPerfilId();
+        SupabaseClient.getInstance().deleteReserva(reservaId,
+                new SupabaseClient.Callback() {
+                    @Override
+                    public void onSuccess(String body) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Reserva cancelada ✅", Toast.LENGTH_SHORT).show();
+                        cargarReservas();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(ProfileActivity.this,
+                                "No se pudo cancelar", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
