@@ -18,7 +18,8 @@ public class BottomNavHelper {
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
                 if (!activeTab.equals("home")) {
-                    activity.startActivity(new Intent(activity, HomeActivity.class));
+                    activity.startActivity(
+                            new Intent(activity, HomeActivity.class));
                     activity.finish();
                 }
             });
@@ -27,7 +28,8 @@ public class BottomNavHelper {
         if (navSearch != null) {
             navSearch.setOnClickListener(v -> {
                 if (!activeTab.equals("search")) {
-                    activity.startActivity(new Intent(activity, SearchActivity.class));
+                    activity.startActivity(
+                            new Intent(activity, SearchActivity.class));
                     activity.finish();
                 }
             });
@@ -36,7 +38,8 @@ public class BottomNavHelper {
         if (navBookings != null) {
             navBookings.setOnClickListener(v -> {
                 if (!activeTab.equals("bookings")) {
-                    activity.startActivity(new Intent(activity, ProfileActivity.class));
+                    activity.startActivity(
+                            new Intent(activity, ProfileActivity.class));
                     activity.finish();
                 }
             });
@@ -45,7 +48,8 @@ public class BottomNavHelper {
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
                 if (!activeTab.equals("profile")) {
-                    activity.startActivity(new Intent(activity, ProfileActivity.class));
+                    activity.startActivity(
+                            new Intent(activity, PerfilActivity.class));
                     activity.finish();
                 }
             });
