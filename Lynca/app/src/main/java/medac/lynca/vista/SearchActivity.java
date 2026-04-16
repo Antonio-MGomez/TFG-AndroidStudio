@@ -31,16 +31,17 @@ public class SearchActivity extends AppCompatActivity {
 
     // Modelo interno con URL de imagen
     static class PistaItem {
-        String id, nombre, tipoDeporte, imagenUrl;
+        String id, nombre, tipoDeporte, imagenUrl, descripcion;
         double precioHora;
 
-        PistaItem(String id, String nombre, String tipoDeporte,
+        PistaItem(String id, String nombre, String tipoDeporte, String descripcion,
                   double precioHora, String imagenUrl) {
             this.id          = id;
             this.nombre      = nombre;
             this.tipoDeporte = tipoDeporte;
             this.precioHora  = precioHora;
             this.imagenUrl   = imagenUrl;
+            this.descripcion= descripcion;
         }
     }
 
@@ -93,6 +94,7 @@ public class SearchActivity extends AppCompatActivity {
                 String nombre      = pista.optString("nombre", "Pista");
                 String deporte     = pista.optString("tipo_deporte", "");
                 double precio      = pista.optDouble("precio_hora", 0);
+                String descripcion = pista.getString("descripcion");
 
                 // Buscar imagen principal
                 String imagenUrl = "";
@@ -112,7 +114,7 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
 
-                allPistas.add(new PistaItem(id, nombre, deporte, precio, imagenUrl));
+                allPistas.add(new PistaItem(id, nombre, deporte, descripcion, precio, imagenUrl));
             }
         } catch (Exception e) {
             cargarPistasLocal();
@@ -129,16 +131,16 @@ public class SearchActivity extends AppCompatActivity {
         allPistas.clear();
         allPistas.add(new PistaItem(
                 "09b0e24c-79db-482a-8cf2-2c33a3e1dddf",
-                "Pista Tenis", "Tenis", 12, ""));
+                "Pista Tenis", "Tenis", "Hola", 4,""));
         allPistas.add(new PistaItem(
                 "99a95eae-e5cb-49f5-8475-43a659a1fd4a",
-                "Pista Pádel 1", "Pádel", 10, ""));
+                "Pista Pádel 1", "Pádel", "Hola2",5,"" ));
         allPistas.add(new PistaItem(
                 "d3304f3d-c511-41fd-a65f-027566151951",
-                "Pista Pádel 2", "Pádel", 8, ""));
+                "Pista Pádel 2", "Pádel", "Hola3", 6,""));
         allPistas.add(new PistaItem(
                 "eb1707df-023f-4353-ad4c-3a6ebb27f0de",
-                "Pista Fútbol Sala", "Fútbol Sala", 10, ""));
+                "Pista Fútbol Sala", "Fútbol Sala", "Hola4", 5,""));
 
         filtered.clear();
         filtered.addAll(allPistas);
@@ -229,13 +231,13 @@ public class SearchActivity extends AppCompatActivity {
     // ════════════════════════════════════════════════════════════
     private void abrirPista(PistaItem p) {
         Intent intent = new Intent(this, PistaInfoActivity.class);
-        intent.putExtra("pista_id",     p.id);
-        intent.putExtra("pista_nombre", p.nombre);
-        intent.putExtra("tipo_deporte", p.tipoDeporte);
-        intent.putExtra("precio_hora",  String.valueOf((int) p.precioHora));
-        intent.putExtra("imagen_url",   p.imagenUrl);
-        // Imagen local de fallback
-        intent.putExtra("imagen_res",   getImagenLocal(p.tipoDeporte));
+        intent.putExtra("pista_id",      p.id);
+        intent.putExtra("pista_nombre",  p.nombre);
+        intent.putExtra("tipo_deporte",  p.tipoDeporte);
+        intent.putExtra("precio_hora",   String.valueOf((int) p.precioHora));
+        intent.putExtra("imagen_url",    p.imagenUrl);
+        intent.putExtra("descripcion",   p.descripcion);
+        intent.putExtra("imagen_res",    getImagenLocal(p.tipoDeporte));
         startActivity(intent);
     }
 
