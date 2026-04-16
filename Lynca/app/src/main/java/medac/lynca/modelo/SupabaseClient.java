@@ -173,6 +173,16 @@ public class SupabaseClient {
     // ════════════════════════════════════════════════════════════
     //  INTERNO
     // ════════════════════════════════════════════════════════════
+    public void deleteAccount(String perfilId, Callback callback) {
+        Request req = new Request.Builder()
+                .url(SupabaseConfig.REST_URL + "/perfiles?id=eq." + perfilId)
+                .addHeader("apikey", SupabaseConfig.ANON_KEY)
+                .addHeader("Content-Type", "application/json")
+                .delete()
+                .build();
+
+        executeAsync(req, callback);
+    }
     private void executeAsync(Request request, Callback callback) {
         http.newCall(request).enqueue(new okhttp3.Callback() {
             @Override

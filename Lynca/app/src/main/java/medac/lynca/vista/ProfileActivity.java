@@ -33,20 +33,24 @@ public class ProfileActivity extends AppCompatActivity {
     private final List<ReservationModel> pastList   = new ArrayList<>();
     private boolean showingActive = true;
 
-    // Mapa de IDs de pistas a nombres legibles
     private String getNombrePista(String pistaId) {
         if (pistaId == null) return "Instalación";
         switch (pistaId) {
-            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf":
-                return "Pista Tenis";
+            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf": return "Pista Tenis";
+            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a": return "Pista Pádel 1";
+            case "d3304f3d-c511-41fd-a65f-027566151951": return "Pista Pádel 2";
+            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de": return "Pista Fútbol Sala";
+            default: return "Instalación deportiva";
+        }
+    }
+
+    private String getImagenPorPista(String pistaId) {
+        if (pistaId == null) return "pista_baloncesto_1";
+        switch (pistaId) {
+            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf": return "pista_tenis";
             case "99a95eae-e5cb-49f5-8475-43a659a1fd4a":
-                return "Pista Pádel 1";
-            case "d3304f3d-c511-41fd-a65f-027566151951":
-                return "Pista Pádel 2";
-            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de":
-                return "Pista Fútbol Sala";
-            default:
-                return "Instalación deportiva";
+            case "d3304f3d-c511-41fd-a65f-027566151951": return "pista_padel";
+            default: return "pista_baloncesto_1";
         }
     }
 
@@ -61,7 +65,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        // Mostrar nombre y email
         SessionManager session = SessionManager.getInstance(this);
         TextView tvName  = findViewById(R.id.tvProfileName);
         TextView tvEmail = findViewById(R.id.tvProfileEmail);
@@ -71,7 +74,8 @@ public class ProfileActivity extends AppCompatActivity {
         btnReservadas.setOnClickListener(v -> mostrarLista(true));
         btnPasadas.setOnClickListener(v    -> mostrarLista(false));
 
-        BottomNavHelper.setup(this, "profile");
+        // ── Bookings activo en la barra ──────────────────────────
+        BottomNavHelper.setup(this, "bookings");
 
         cargarReservas();
     }
@@ -117,28 +121,18 @@ public class ProfileActivity extends AppCompatActivity {
             JSONArray arr = new JSONArray(body);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject obj    = arr.getJSONObject(i);
-                String estado     = obj.optString("estado_reserva", "Pendiente");
+                String estado     = obj.optString("estado_reserva", "Confirmada");
                 String fecha      = obj.optString("fecha_reserva", "");
                 String horaInicio = obj.optString("hora_inicio", "");
                 String horaFin    = obj.optString("hora_fin", "");
                 String pistaId    = obj.optString("pista_id", "");
 
-                // Nombre legible de la pista
                 String pistaNombre = getNombrePista(pistaId);
-
-                // Formato de tiempo limpio
-                String timeStr = fecha + "  " + horaInicio + " - " + horaFin;
-
-                // Imagen según tipo de pista
-                String imgNombre = getImagenPorPista(pistaId);
+                String imgNombre   = getImagenPorPista(pistaId);
+                String timeStr     = fecha + "  " + horaInicio + " - " + horaFin;
 
                 ReservationModel res = new ReservationModel(
-                        0L,
-                        pistaNombre,
-                        timeStr,
-                        imgNombre,
-                        estado
-                );
+                        0L, pistaNombre, timeStr, imgNombre, estado);
 
                 if ("Confirmada".equalsIgnoreCase(estado)
                         || "Pendiente".equalsIgnoreCase(estado)) {
@@ -153,21 +147,6 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         mostrarLista(showingActive);
-    }
-
-    private String getImagenPorPista(String pistaId) {
-        if (pistaId == null) return "pista_baloncesto_1";
-        switch (pistaId) {
-            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf":
-                return "pista_tenis";
-            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a":
-            case "d3304f3d-c511-41fd-a65f-027566151951":
-                return "pista_padel";
-            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de":
-                return "pista_baloncesto_1";
-            default:
-                return "pista_baloncesto_1";
-        }
     }
 
     private void mostrarLista(boolean active) {
@@ -195,8 +174,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void cancelarReserva(ReservationModel reserva) {
-        // Como no tenemos el ID de la reserva guardado,
-        // recargamos la lista desde Supabase para obtenerlo
         SessionManager session = SessionManager.getInstance(this);
         String perfilId        = session.getPerfilId();
 
@@ -206,12 +183,10 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onSuccess(String body) {
                         try {
                             JSONArray arr = new JSONArray(body);
-                            // Cancelar la primera reserva que coincida
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject obj = arr.getJSONObject(i);
                                 String fecha   = obj.optString("fecha_reserva","");
                                 String hora    = obj.optString("hora_inicio","");
-                                String timeStr = fecha + "  " + hora;
 
                                 if (reserva.getTime().contains(fecha)
                                         && reserva.getTime().contains(hora)) {
@@ -235,7 +210,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void eliminarReserva(String reservaId) {
-        String token = SessionManager.getInstance(this).getPerfilId();
         SupabaseClient.getInstance().deleteReserva(reservaId,
                 new SupabaseClient.Callback() {
                     @Override

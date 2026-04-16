@@ -1,6 +1,7 @@
 package medac.lynca.vista;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,6 +27,18 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Aplicar modo nocturno guardado
+        SharedPreferences prefs = getSharedPreferences("LyncaPrefs", MODE_PRIVATE);
+        boolean darkMode = prefs.getBoolean("dark_mode", false);
+        if (darkMode) {
+            AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         setContentView(R.layout.activity_login);
 
         // Si ya tiene sesión → ir directo al Home
@@ -48,49 +62,51 @@ public class LoginActivity extends AppCompatActivity {
             btnLogin.setEnabled(false);
             btnLogin.setText("Entrando...");
 
-            SupabaseClient.getInstance().login(email, pass, new SupabaseClient.Callback() {
-                @Override
-                public void onSuccess(String body) {
-                    try {
-                        JSONArray arr = new JSONArray(body);
+            SupabaseClient.getInstance().login(email, pass,
+                    new SupabaseClient.Callback() {
+                        @Override
+                        public void onSuccess(String body) {
+                            try {
+                                JSONArray arr = new JSONArray(body);
 
-                        if (arr.length() == 0) {
+                                if (arr.length() == 0) {
+                                    btnLogin.setEnabled(true);
+                                    btnLogin.setText("Iniciar Sesión");
+                                    Toast.makeText(LoginActivity.this,
+                                            "Email o contraseña incorrectos",
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                JSONObject perfil = arr.getJSONObject(0);
+                                String perfilId   = perfil.getString("id");
+                                String userEmail  = perfil.getString("email");
+                                String nombre     = perfil.optString(
+                                        "nombre_completo", "Usuario");
+
+                                SessionManager.getInstance(LoginActivity.this)
+                                        .saveSession(perfilId, userEmail, nombre);
+
+                                goToHome();
+
+                            } catch (Exception e) {
+                                btnLogin.setEnabled(true);
+                                btnLogin.setText("Iniciar Sesión");
+                                Toast.makeText(LoginActivity.this,
+                                        "Error al procesar respuesta",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
                             btnLogin.setEnabled(true);
                             btnLogin.setText("Iniciar Sesión");
                             Toast.makeText(LoginActivity.this,
-                                    "Email o contraseña incorrectos",
+                                    "Error de conexión. Inténtalo de nuevo.",
                                     Toast.LENGTH_SHORT).show();
-                            return;
                         }
-
-                        JSONObject perfil = arr.getJSONObject(0);
-                        String perfilId   = perfil.getString("id");
-                        String userEmail  = perfil.getString("email");
-                        String nombre     = perfil.optString("nombre_completo", "Usuario");
-
-                        SessionManager.getInstance(LoginActivity.this)
-                                .saveSession(perfilId, userEmail, nombre);
-
-                        goToHome();
-
-                    } catch (Exception e) {
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Iniciar Sesión");
-                        Toast.makeText(LoginActivity.this,
-                                "Error al procesar respuesta",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    btnLogin.setEnabled(true);
-                    btnLogin.setText("Iniciar Sesión");
-                    Toast.makeText(LoginActivity.this,
-                            "Error de conexión. Inténtalo de nuevo.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
+                    });
         });
 
         btnGoogle.setOnClickListener(v ->
@@ -101,7 +117,8 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, RegisterActivity.class)));
 
         tvForgotPassword.setOnClickListener(v ->
-                startActivity(new Intent(this, RecuperarContrasenaActivity.class)));
+                startActivity(new Intent(this,
+                        RecuperarContrasenaActivity.class)));
     }
 
     private void goToHome() {
