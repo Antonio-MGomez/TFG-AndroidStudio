@@ -29,29 +29,29 @@ import medac.lynca.modelo.SupabaseClient;
 
 public class SearchActivity extends AppCompatActivity {
 
-    // Modelo interno con URL de imagen
     static class PistaItem {
         String id, nombre, tipoDeporte, imagenUrl, descripcion;
         double precioHora;
 
-        PistaItem(String id, String nombre, String tipoDeporte, String descripcion,
-                  double precioHora, String imagenUrl) {
+        PistaItem(String id, String nombre, String tipoDeporte,
+                  double precioHora, String imagenUrl, String descripcion) {
             this.id          = id;
             this.nombre      = nombre;
             this.tipoDeporte = tipoDeporte;
             this.precioHora  = precioHora;
             this.imagenUrl   = imagenUrl;
-            this.descripcion= descripcion;
+            this.descripcion = descripcion;
         }
     }
 
-    private final List<PistaItem> allPistas  = new ArrayList<>();
-    private final List<PistaItem> filtered   = new ArrayList<>();
+    private final List<PistaItem> allPistas = new ArrayList<>();
+    private final List<PistaItem> filtered  = new ArrayList<>();
     private PistaAdapter adapter;
     private String activeChip = "Todos";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
@@ -59,14 +59,9 @@ public class SearchActivity extends AppCompatActivity {
         setupSearch();
         setupChips();
         BottomNavHelper.setup(this, "search");
-
-        // Cargar pistas desde Supabase
         cargarPistas();
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Cargar pistas desde Supabase
-    // ════════════════════════════════════════════════════════════
     private void cargarPistas() {
         SupabaseClient.getInstance().getPistasConImagenes(
                 new SupabaseClient.Callback() {
@@ -74,12 +69,12 @@ public class SearchActivity extends AppCompatActivity {
                     public void onSuccess(String body) {
                         parsearPistas(body);
                     }
-
                     @Override
                     public void onError(String error) {
                         Toast.makeText(SearchActivity.this,
-                                "Error cargando pistas", Toast.LENGTH_SHORT).show();
-                        cargarPistasLocal(); // fallback a datos locales
+                                "Error cargando pistas",
+                                Toast.LENGTH_SHORT).show();
+                        cargarPistasLocal();
                     }
                 });
     }
@@ -90,13 +85,12 @@ public class SearchActivity extends AppCompatActivity {
             JSONArray arr = new JSONArray(body);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject pista = arr.getJSONObject(i);
-                String id          = pista.getString("id");
-                String nombre      = pista.optString("nombre", "Pista");
-                String deporte     = pista.optString("tipo_deporte", "");
-                double precio      = pista.optDouble("precio_hora", 0);
-                String descripcion = pista.getString("descripcion");
+                String id      = pista.getString("id");
+                String nombre  = pista.optString("nombre", "Pista");
+                String deporte = pista.optString("tipo_deporte", "");
+                double precio  = pista.optDouble("precio_hora", 0);
+                String desc    = pista.optString("descripcion", "");
 
-                // Buscar imagen principal
                 String imagenUrl = "";
                 if (pista.has("imagenes_pista")) {
                     JSONArray imgs = pista.getJSONArray("imagenes_pista");
@@ -107,49 +101,42 @@ public class SearchActivity extends AppCompatActivity {
                             break;
                         }
                     }
-                    // Si no hay principal, usar la primera
                     if (imagenUrl.isEmpty() && imgs.length() > 0) {
                         imagenUrl = imgs.getJSONObject(0)
                                 .optString("url_imagen", "");
                     }
                 }
-
-                allPistas.add(new PistaItem(id, nombre, deporte, descripcion, precio, imagenUrl));
+                allPistas.add(new PistaItem(
+                        id, nombre, deporte, precio, imagenUrl, desc));
             }
         } catch (Exception e) {
             cargarPistasLocal();
             return;
         }
-
         filtered.clear();
         filtered.addAll(allPistas);
         adapter.notifyDataSetChanged();
     }
 
-    // Fallback con datos locales si Supabase falla
     private void cargarPistasLocal() {
         allPistas.clear();
         allPistas.add(new PistaItem(
                 "09b0e24c-79db-482a-8cf2-2c33a3e1dddf",
-                "Pista Tenis", "Tenis", "Hola", 4,""));
+                "Pista Tenis", "Tenis", 12, "", ""));
         allPistas.add(new PistaItem(
                 "99a95eae-e5cb-49f5-8475-43a659a1fd4a",
-                "Pista Pádel 1", "Pádel", "Hola2",5,"" ));
+                "Pista Pádel 1", "Pádel", 10, "", ""));
         allPistas.add(new PistaItem(
                 "d3304f3d-c511-41fd-a65f-027566151951",
-                "Pista Pádel 2", "Pádel", "Hola3", 6,""));
+                "Pista Pádel 2", "Pádel", 8, "", ""));
         allPistas.add(new PistaItem(
                 "eb1707df-023f-4353-ad4c-3a6ebb27f0de",
-                "Pista Fútbol Sala", "Fútbol Sala", "Hola4", 5,""));
-
+                "Pista Fútbol Sala", "Fútbol Sala", 10, "", ""));
         filtered.clear();
         filtered.addAll(allPistas);
         adapter.notifyDataSetChanged();
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  RecyclerView
-    // ════════════════════════════════════════════════════════════
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvFacilities);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -157,9 +144,6 @@ public class SearchActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Búsqueda
-    // ════════════════════════════════════════════════════════════
     private void setupSearch() {
         EditText etSearch = findViewById(R.id.etSearch);
         etSearch.addTextChangedListener(new TextWatcher() {
@@ -171,22 +155,20 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Chips
-    // ════════════════════════════════════════════════════════════
     private void setupChips() {
         int[] chipIds = {
                 R.id.chipTodos, R.id.chipTenis, R.id.chipPadel,
                 R.id.chipFutbol, R.id.chipBaloncesto
         };
-
-        String[] deportes = {"Todos","Tenis","Pádel","Fútbol Sala","Baloncesto"};
+        String[] deportes = {
+                "Todos","Tenis","Pádel","Fútbol Sala","Baloncesto"
+        };
 
         for (int i = 0; i < chipIds.length; i++) {
             TextView chip = findViewById(chipIds[i]);
             if (chip == null) continue;
-            final String deporte = deportes[i];
-            final int selectedId = chipIds[i];
+            final String deporte   = deportes[i];
+            final int    selectedId = chipIds[i];
             chip.setOnClickListener(v -> {
                 activeChip = deporte;
                 updateChipStyles(chipIds, selectedId);
@@ -210,9 +192,6 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Filtros
-    // ════════════════════════════════════════════════════════════
     private void applyFilters(String query) {
         filtered.clear();
         for (PistaItem p : allPistas) {
@@ -226,34 +205,28 @@ public class SearchActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Abrir pista
-    // ════════════════════════════════════════════════════════════
     private void abrirPista(PistaItem p) {
         Intent intent = new Intent(this, PistaInfoActivity.class);
-        intent.putExtra("pista_id",      p.id);
-        intent.putExtra("pista_nombre",  p.nombre);
-        intent.putExtra("tipo_deporte",  p.tipoDeporte);
-        intent.putExtra("precio_hora",   String.valueOf((int) p.precioHora));
-        intent.putExtra("imagen_url",    p.imagenUrl);
-        intent.putExtra("descripcion",   p.descripcion);
-        intent.putExtra("imagen_res",    getImagenLocal(p.tipoDeporte));
+        intent.putExtra("pista_id",     p.id);
+        intent.putExtra("pista_nombre", p.nombre);
+        intent.putExtra("tipo_deporte", p.tipoDeporte);
+        intent.putExtra("precio_hora",  String.valueOf((int) p.precioHora));
+        intent.putExtra("imagen_url",   p.imagenUrl);
+        intent.putExtra("descripcion",  p.descripcion);
+        intent.putExtra("imagen_res",   getImagenLocal(p.tipoDeporte));
         startActivity(intent);
     }
 
     private int getImagenLocal(String deporte) {
         if (deporte == null) return R.drawable.pista_baloncesto_1;
         switch (deporte) {
-            case "Tenis":      return R.drawable.pista_tenis;
+            case "Tenis":  return R.drawable.pista_tenis;
             case "Pádel":
-            case "Padel":      return R.drawable.pista_padel;
-            default:           return R.drawable.pista_baloncesto_1;
+            case "Padel":  return R.drawable.pista_padel;
+            default:       return R.drawable.pista_baloncesto_1;
         }
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  Adapter
-    // ════════════════════════════════════════════════════════════
     class PistaAdapter extends RecyclerView.Adapter<PistaAdapter.VH> {
 
         private final List<PistaItem> list;
@@ -273,7 +246,6 @@ public class SearchActivity extends AppCompatActivity {
             holder.tvCity.setText(p.tipoDeporte);
             holder.tvPrice.setText((int) p.precioHora + "€");
 
-            // Cargar imagen desde URL o fallback local
             if (p.imagenUrl != null && !p.imagenUrl.isEmpty()) {
                 Glide.with(holder.itemView.getContext())
                         .load(p.imagenUrl)

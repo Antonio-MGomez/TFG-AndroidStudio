@@ -56,6 +56,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
@@ -74,9 +75,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnReservadas.setOnClickListener(v -> mostrarLista(true));
         btnPasadas.setOnClickListener(v    -> mostrarLista(false));
 
-        // ── Bookings activo en la barra ──────────────────────────
         BottomNavHelper.setup(this, "bookings");
-
         cargarReservas();
     }
 
@@ -102,7 +101,6 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onSuccess(String body) {
                         procesarReservas(body);
                     }
-
                     @Override
                     public void onError(String error) {
                         Toast.makeText(ProfileActivity.this,
@@ -197,14 +195,15 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                         } catch (Exception e) {
                             Toast.makeText(ProfileActivity.this,
-                                    "Error al cancelar", Toast.LENGTH_SHORT).show();
+                                    "Error al cancelar",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
                     public void onError(String error) {
                         Toast.makeText(ProfileActivity.this,
-                                "No se pudo cancelar", Toast.LENGTH_SHORT).show();
+                                "No se pudo cancelar",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -215,14 +214,15 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(String body) {
                         Toast.makeText(ProfileActivity.this,
-                                "Reserva cancelada ✅", Toast.LENGTH_SHORT).show();
+                                "Reserva cancelada ✅",
+                                Toast.LENGTH_SHORT).show();
                         cargarReservas();
                     }
-
                     @Override
                     public void onError(String error) {
                         Toast.makeText(ProfileActivity.this,
-                                "No se pudo cancelar", Toast.LENGTH_SHORT).show();
+                                "No se pudo cancelar",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }

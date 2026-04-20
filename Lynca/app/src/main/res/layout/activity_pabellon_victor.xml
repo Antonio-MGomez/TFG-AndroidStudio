@@ -232,7 +232,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_compass"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Home" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/home" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navSearch"
@@ -243,8 +243,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Search" android:textSize="11sp" android:textColor="#1E4DB7"
-                android:textStyle="bold"/>
+                android:text="@string/search" android:textSize="11sp"
+                android:textColor="#1E4DB7" android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navBookings"
@@ -255,7 +255,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_agenda"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Bookings" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/bookings" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navProfile"
@@ -266,9 +266,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_myplaces"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Profile" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/profile" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

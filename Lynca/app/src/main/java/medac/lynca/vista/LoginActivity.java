@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        LanguageHelper.applyOnCreate(this);
 
         // Aplicar modo nocturno guardado
         SharedPreferences prefs = getSharedPreferences("LyncaPrefs", MODE_PRIVATE);
@@ -39,9 +39,9 @@ public class LoginActivity extends AppCompatActivity {
                     AppCompatDelegate.MODE_NIGHT_NO);
         }
 
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Si ya tiene sesión → ir directo al Home
         if (SessionManager.getInstance(this).isLoggedIn()) {
             goToHome();
             return;
@@ -68,10 +68,10 @@ public class LoginActivity extends AppCompatActivity {
                         public void onSuccess(String body) {
                             try {
                                 JSONArray arr = new JSONArray(body);
-
                                 if (arr.length() == 0) {
                                     btnLogin.setEnabled(true);
-                                    btnLogin.setText("Iniciar Sesión");
+                                    btnLogin.setText(
+                                            getString(R.string.inicio_sesion));
                                     Toast.makeText(LoginActivity.this,
                                             "Email o contraseña incorrectos",
                                             Toast.LENGTH_SHORT).show();
@@ -86,12 +86,11 @@ public class LoginActivity extends AppCompatActivity {
 
                                 SessionManager.getInstance(LoginActivity.this)
                                         .saveSession(perfilId, userEmail, nombre);
-
                                 goToHome();
 
                             } catch (Exception e) {
                                 btnLogin.setEnabled(true);
-                                btnLogin.setText("Iniciar Sesión");
+                                btnLogin.setText(getString(R.string.inicio_sesion));
                                 Toast.makeText(LoginActivity.this,
                                         "Error al procesar respuesta",
                                         Toast.LENGTH_SHORT).show();
@@ -101,7 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onError(String error) {
                             btnLogin.setEnabled(true);
-                            btnLogin.setText("Iniciar Sesión");
+                            btnLogin.setText(getString(R.string.inicio_sesion));
                             Toast.makeText(LoginActivity.this,
                                     "Error de conexión. Inténtalo de nuevo.",
                                     Toast.LENGTH_SHORT).show();
@@ -110,7 +109,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         btnGoogle.setOnClickListener(v ->
-                Toast.makeText(this, "Login con Google próximamente",
+                Toast.makeText(this,
+                        getString(R.string.proximamente),
                         Toast.LENGTH_SHORT).show());
 
         btnRegister.setOnClickListener(v ->

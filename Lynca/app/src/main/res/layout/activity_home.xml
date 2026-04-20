@@ -17,7 +17,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- HEADER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,7 +38,7 @@
                         android:id="@+id/tvWelcome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="¡Bienvenido,"
+                        android:text="@string/bienvenido"
                         android:textColor="#6B7280"
                         android:textSize="14sp"/>
 
@@ -62,7 +61,6 @@
                     android:padding="6dp"/>
             </LinearLayout>
 
-            <!-- BUSCADOR -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -93,13 +91,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="Buscar instalaciones..."
+                        android:text="@string/buscar_instalaciones"
                         android:textColor="#6B7280"
                         android:textSize="14sp"/>
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- FEATURED -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,7 +109,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Featured Facilities"
+                    android:text="@string/featured_facilities"
                     android:textColor="#1E4DB7"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -171,7 +168,7 @@
                                 android:id="@+id/btnBookNow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="40dp"
-                                android:text="BOOK NOW"
+                                android:text="@string/book_now"
                                 android:textColor="#FFFFFF"
                                 android:backgroundTint="#1E4DB7"
                                 android:paddingStart="44dp"
@@ -183,7 +180,6 @@
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <!-- POPULAR NEAR YOU -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -195,7 +191,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Popular Near You"
+                    android:text="@string/popular_near_you"
                     android:textColor="#1E4DB7"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -211,7 +207,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- BOTTOM NAVIGATION -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
@@ -228,7 +223,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_compass"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Home" android:textSize="11sp"
+                android:text="@string/home" android:textSize="11sp"
                 android:textColor="#1E4DB7" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -240,7 +235,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Search" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/search" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navBookings"
@@ -251,7 +246,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_agenda"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Bookings" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/bookings" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navProfile"
@@ -262,7 +257,7 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_myplaces"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Profile" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/profile" android:textSize="11sp" android:textColor="#6B7280"/>
         </LinearLayout>
 
     </LinearLayout>
