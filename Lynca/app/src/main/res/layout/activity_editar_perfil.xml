@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F2F4F8">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1E4DB7"
+        android:orientation="horizontal"
+        android:paddingTop="48dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Editar perfil"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+
+        <Button
+            android:id="@+id/btnGuardar"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Guardar"
+            android:textColor="#1E4DB7"
+            android:backgroundTint="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"/>
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
+
+            <!-- FOTO DE PERFIL -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:layout_marginBottom="12dp">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgEditPerfil"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/foto_jose"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/bg_circle_white"/>
+
+                    <LinearLayout
+                        android:id="@+id/btnCambiarFoto"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="bottom|end"
+                        android:background="#1E4DB7"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@android:drawable/ic_menu_camera"/>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cambiar foto"
+                    android:textColor="#1E4DB7"
+                    android:textSize="13sp"
+                    android:layout_marginTop="8dp"/>
+
+            </LinearLayout>
+
+            <!-- INFORMACIÓN PERSONAL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="INFORMACIÓN PERSONAL"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingStart="20dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Nombre -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nombre completo"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etNombreEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:inputType="textPersonName"
+                        android:textSize="15sp"
+                        android:textColor="#111827"
+                        android:hint="Tu nombre completo"
+                        android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginBottom="16dp"/>
+
+                    <!-- Email -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etEmailEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:inputType="textEmailAddress"
+                        android:textSize="15sp"
+                        android:textColor="#111827"
+                        android:hint="Tu email"
+                        android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginBottom="16dp"/>
+
+                    <!-- Código postal -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Código postal"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etCodigoPostalEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:inputType="number"
+                        android:textSize="15sp"
+                        android:textColor="#111827"
+                        android:hint="Tu código postal"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SEGURIDAD -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SEGURIDAD"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingStart="20dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Nueva contraseña -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nueva contraseña"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etNuevaPass"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:inputType="textPassword"
+                        android:textSize="15sp"
+                        android:textColor="#111827"
+                        android:hint="Dejar en blanco para no cambiar"
+                        android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginBottom="16dp"/>
+
+                    <!-- Confirmar contraseña -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Confirmar contraseña"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etConfirmarPass"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:inputType="textPassword"
+                        android:textSize="15sp"
+                        android:textColor="#111827"
+                        android:hint="Repite la nueva contraseña"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- DEPORTES FAVORITOS -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DEPORTE FAVORITO"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingStart="20dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/btnDeporteTenis"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="🎾\nTenis"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:textColor="#111827"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true" android:focusable="true"/>
+
+                    <TextView
+                        android:id="@+id/btnDeportePadel"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="🏓\nPádel"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:textColor="#111827"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true" android:focusable="true"/>
+
+                    <TextView
+                        android:id="@+id/btnDeporteFutbol"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="⚽\nFútbol"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:textColor="#111827"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true" android:focusable="true"/>
+
+                    <TextView
+                        android:id="@+id/btnDeporteBalon"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="🏀\nBasket"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:textColor="#111827"
+                        android:textSize="12sp"
+                        android:clickable="true" android:focusable="true"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

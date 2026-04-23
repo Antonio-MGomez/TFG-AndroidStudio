@@ -37,6 +37,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/viewPagerHeader"/>
 
+            <TextView
+                android:id="@+id/tvDireccion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:text="📍 Dirección"
+                android:textColor="#6B7280"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvPistaNombre"/>
+
             <LinearLayout
                 android:id="@+id/layoutRating"
                 android:layout_width="wrap_content"
@@ -45,10 +58,10 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvPistaNombre">
-
+                app:layout_constraintTop_toBottomOf="@id/tvDireccion">
                 <ImageView android:layout_width="20dp" android:layout_height="20dp"
-                    android:src="@android:drawable/btn_star_big_on" app:tint="#F59E0B"/>
+                    android:src="@android:drawable/btn_star_big_on"
+                    app:tint="#F59E0B"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:layout_marginStart="4dp" android:text="4.8"
                     android:textColor="#000000" android:textStyle="bold"/>
@@ -108,6 +121,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Instalación deportiva de alta calidad."
                 android:textColor="#000000"
+                android:lineSpacingMultiplier="1.5"
                 app:layout_constraintTop_toBottomOf="@id/tvDescTitle"/>
 
             <TextView
@@ -155,23 +169,27 @@
                     <TextView android:id="@+id/tvUser1"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:text="MariaSport99" android:textColor="#000000" android:textStyle="bold"
+                        android:text="MariaSport99" android:textColor="#000000"
+                        android:textStyle="bold"
                         app:layout_constraintStart_toEndOf="@id/imgUser1"
                         app:layout_constraintTop_toTopOf="@id/imgUser1"/>
-                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    <LinearLayout android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/tvUser1">
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
-                            android:src="@android:drawable/btn_star_big_on" app:tint="#F59E0B"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:src="@android:drawable/btn_star_big_on"
+                            app:tint="#F59E0B"/>
+                        <TextView android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="4dp" android:text="4.9"
                             android:textColor="#000000" android:textStyle="bold"/>
                     </LinearLayout>
                     <TextView android:id="@+id/tvReview1Text"
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Instalación impecable, muy bien mantenida. La reserva fue rapidísima."
+                        android:text="Instalación impecable, muy bien mantenida."
                         android:textColor="#333333"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@id/tvUser1"
@@ -201,23 +219,27 @@
                     <TextView android:id="@+id/tvUser2"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:text="CarlosDeportivo" android:textColor="#000000" android:textStyle="bold"
+                        android:text="CarlosDeportivo" android:textColor="#000000"
+                        android:textStyle="bold"
                         app:layout_constraintStart_toEndOf="@id/imgUser2"
                         app:layout_constraintTop_toTopOf="@id/imgUser2"/>
-                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    <LinearLayout android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/tvUser2">
                         <ImageView android:layout_width="16dp" android:layout_height="16dp"
-                            android:src="@android:drawable/btn_star_big_on" app:tint="#F59E0B"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:src="@android:drawable/btn_star_big_on"
+                            app:tint="#F59E0B"/>
+                        <TextView android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="4dp" android:text="4.7"
                             android:textColor="#000000" android:textStyle="bold"/>
                     </LinearLayout>
                     <TextView
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Muy buena iluminación y vestuarios limpios. Totalmente recomendable."
+                        android:text="Muy buena iluminación y vestuarios limpios."
                         android:textColor="#333333"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@id/tvUser2"
@@ -284,7 +306,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_compass"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/home" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/home" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navSearch"
@@ -295,7 +318,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/search" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/search" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navBookings"
@@ -306,7 +330,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_agenda"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/bookings" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/bookings" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navProfile"
@@ -317,8 +342,10 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_myplaces"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/profile" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/profile" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

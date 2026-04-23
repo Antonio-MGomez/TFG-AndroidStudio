@@ -14,10 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import medac.lynca.R;
 import medac.lynca.modelo.SessionManager;
 import medac.lynca.modelo.SupabaseClient;
+import medac.lynca.modelo.SupabaseConfig;
 
 public class PerfilActivity extends AppCompatActivity {
 
@@ -26,47 +28,66 @@ public class PerfilActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Aplicar idioma guardado
         LanguageHelper.applyOnCreate(this);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
+        setupUI();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         SessionManager session = SessionManager.getInstance(this);
 
-        // ── Nombre y email ────────────────────────────────────────
         TextView tvNombre = findViewById(R.id.tvNombrePerfil);
         TextView tvEmail  = findViewById(R.id.tvEmailPerfil);
         if (tvNombre != null) tvNombre.setText(session.getNombre());
         if (tvEmail  != null) tvEmail.setText(session.getEmail());
 
-        // ── Idioma actual en el TextView ──────────────────────────
         TextView tvIdiomaActual = findViewById(R.id.tvIdiomaActual);
         if (tvIdiomaActual != null) {
             tvIdiomaActual.setText(
                     getNombreIdioma(LanguageHelper.getSavedLanguage(this)));
         }
 
-        // ── Estadísticas ──────────────────────────────────────────
-        cargarEstadisticas(session.getPerfilId());
+        String deporte = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getString("deporte_favorito", "Tenis");
+        TextView tvDeporte = findViewById(R.id.tvDeporteFavorito);
+        if (tvDeporte != null) {
+            switch (deporte) {
+                case "Tenis":      tvDeporte.setText("🎾"); break;
+                case "Pádel":      tvDeporte.setText("🏓"); break;
+                case "Fútbol":     tvDeporte.setText("⚽"); break;
+                case "Baloncesto": tvDeporte.setText("🏀"); break;
+                default:           tvDeporte.setText("🎾"); break;
+            }
+        }
 
-        // ── Mis Reservas ──────────────────────────────────────────
+        cargarEstadisticas(session.getPerfilId());
+        cargarFechaRegistro(session.getPerfilId());
+    }
+
+    private void setupUI() {
+        SessionManager session = SessionManager.getInstance(this);
+
+        TextView tvNombre = findViewById(R.id.tvNombrePerfil);
+        TextView tvEmail  = findViewById(R.id.tvEmailPerfil);
+        if (tvNombre != null) tvNombre.setText(session.getNombre());
+        if (tvEmail  != null) tvEmail.setText(session.getEmail());
+
         LinearLayout btnMisReservas = findViewById(R.id.btnMisReservas);
         if (btnMisReservas != null) {
             btnMisReservas.setOnClickListener(v ->
                     startActivity(new Intent(this, ProfileActivity.class)));
         }
 
-        // ── Editar Perfil ─────────────────────────────────────────
         LinearLayout btnEditar = findViewById(R.id.btnEditarPerfil);
         if (btnEditar != null) {
             btnEditar.setOnClickListener(v ->
-                    Toast.makeText(this,
-                            getString(R.string.proximamente),
-                            Toast.LENGTH_SHORT).show());
+                    startActivity(new Intent(this, EditarPerfilActivity.class)));
         }
 
-        // ── Modo Nocturno ─────────────────────────────────────────
         Switch switchNocturno = findViewById(R.id.switchModoNocturno);
         if (switchNocturno != null) {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -87,48 +108,116 @@ public class PerfilActivity extends AppCompatActivity {
                     });
         }
 
-        // ── Selector de Idioma ────────────────────────────────────
         LinearLayout btnIdioma = findViewById(R.id.btnIdioma);
         if (btnIdioma != null) {
             btnIdioma.setOnClickListener(v -> mostrarSelectorIdioma());
         }
 
-        // ── Cerrar Sesión ─────────────────────────────────────────
+        LinearLayout btnAyuda = findViewById(R.id.btnAyudaSoporte);
+        if (btnAyuda != null) {
+            btnAyuda.setOnClickListener(v ->
+                    startActivity(new Intent(this, AyudaActivity.class)));
+        }
+
+        LinearLayout btnTerminos = findViewById(R.id.btnTerminos);
+        if (btnTerminos != null) {
+            btnTerminos.setOnClickListener(v ->
+                    startActivity(new Intent(this, TerminosActivity.class)));
+        }
+
         LinearLayout btnCerrar = findViewById(R.id.btnCerrarSesion);
         if (btnCerrar != null) {
             btnCerrar.setOnClickListener(v -> cerrarSesion());
         }
 
-        // ── Eliminar Cuenta ───────────────────────────────────────
         LinearLayout btnEliminar = findViewById(R.id.btnEliminarCuenta);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> confirmarEliminarCuenta());
         }
 
-        // ── Bottom nav ────────────────────────────────────────────
         BottomNavHelper.setup(this, "profile");
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Cargar fecha de registro desde Supabase
+    // ════════════════════════════════════════════════════════════
+    private void cargarFechaRegistro(String perfilId) {
+        if (perfilId == null) return;
+
+        new Thread(() -> {
+            try {
+                okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                okhttp3.Request req = new okhttp3.Request.Builder()
+                        .url(SupabaseConfig.REST_URL
+                                + "/perfiles?id=eq." + perfilId
+                                + "&select=fecha_creacion")
+                        .addHeader("apikey", SupabaseConfig.ANON_KEY)
+                        .get().build();
+
+                okhttp3.Response response = client.newCall(req).execute();
+                String body = response.body() != null
+                        ? response.body().string() : "[]";
+
+                runOnUiThread(() -> {
+                    try {
+                        JSONArray arr = new JSONArray(body);
+                        if (arr.length() > 0) {
+                            JSONObject perfil = arr.getJSONObject(0);
+                            String fechaRaw = perfil.optString(
+                                    "fecha_creacion", "");
+
+                            if (!fechaRaw.isEmpty()) {
+                                // Formato: 2024-04-09T11:47:20 → "09/04/24"
+                                String[] partes = fechaRaw.split("T")[0].split("-");
+                                if (partes.length == 3) {
+                                    String fechaFormato = partes[2] + "/"
+                                            + partes[1] + "/"
+                                            + partes[0].substring(2);
+                                    TextView tvFecha = findViewById(
+                                            R.id.tvFechaRegistro);
+                                    if (tvFecha != null)
+                                        tvFecha.setText(fechaFormato);
+                                }
+                            }
+                        }
+                    } catch (Exception e) { /* ignorar */ }
+                });
+            } catch (Exception e) { /* ignorar */ }
+        }).start();
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Estadísticas
+    // ════════════════════════════════════════════════════════════
+    private void cargarEstadisticas(String perfilId) {
+        if (perfilId == null) return;
+        SupabaseClient.getInstance().getReservas(perfilId,
+                new SupabaseClient.Callback() {
+                    @Override
+                    public void onSuccess(String body) {
+                        try {
+                            JSONArray arr = new JSONArray(body);
+                            TextView tvTotal = findViewById(R.id.tvTotalReservas);
+                            if (tvTotal != null)
+                                tvTotal.setText(String.valueOf(arr.length()));
+                        } catch (Exception e) { /* ignorar */ }
+                    }
+                    @Override
+                    public void onError(String error) { /* ignorar */ }
+                });
     }
 
     // ════════════════════════════════════════════════════════════
     //  Selector de idioma
     // ════════════════════════════════════════════════════════════
     private void mostrarSelectorIdioma() {
-        String[] idiomas = {
-                "Español",
-                "English",
-                "Català",
-                "Euskera",
-                "Galego"
-        };
-        String[] codigos = { "es", "en", "ca", "eu", "gl" };
+        String[] idiomas = {"Español","English","Català","Euskera","Galego"};
+        String[] codigos = {"es","en","ca","eu","gl"};
 
         String actual = LanguageHelper.getSavedLanguage(this);
         int seleccionado = 0;
         for (int i = 0; i < codigos.length; i++) {
-            if (codigos[i].equals(actual)) {
-                seleccionado = i;
-                break;
-            }
+            if (codigos[i].equals(actual)) { seleccionado = i; break; }
         }
 
         new AlertDialog.Builder(this)
@@ -150,28 +239,6 @@ public class PerfilActivity extends AppCompatActivity {
             case "gl": return "Galego";
             default:   return "Español";
         }
-    }
-
-    // ════════════════════════════════════════════════════════════
-    //  Estadísticas
-    // ════════════════════════════════════════════════════════════
-    private void cargarEstadisticas(String perfilId) {
-        if (perfilId == null) return;
-
-        SupabaseClient.getInstance().getReservas(perfilId,
-                new SupabaseClient.Callback() {
-                    @Override
-                    public void onSuccess(String body) {
-                        try {
-                            JSONArray arr = new JSONArray(body);
-                            TextView tvTotal = findViewById(R.id.tvTotalReservas);
-                            if (tvTotal != null)
-                                tvTotal.setText(String.valueOf(arr.length()));
-                        } catch (Exception e) { /* ignorar */ }
-                    }
-                    @Override
-                    public void onError(String error) { /* ignorar */ }
-                });
     }
 
     // ════════════════════════════════════════════════════════════
@@ -233,7 +300,6 @@ public class PerfilActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     }
-
                     @Override
                     public void onError(String error) {
                         Toast.makeText(PerfilActivity.this,

@@ -10,13 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import medac.lynca.R;
-import medac.lynca.modelo.SupabaseClient;
 import medac.lynca.modelo.SupabaseConfig;
 
 public class PistaInfoActivity extends AppCompatActivity {
@@ -56,6 +54,18 @@ public class PistaInfoActivity extends AppCompatActivity {
             }
         }
 
+        // Dirección
+        String direccion = getIntent().getStringExtra("direccion");
+        TextView tvDireccion = findViewById(R.id.tvDireccion);
+        if (tvDireccion != null) {
+            if (direccion != null && !direccion.isEmpty()) {
+                tvDireccion.setText("📍 " + direccion);
+                tvDireccion.setVisibility(android.view.View.VISIBLE);
+            } else {
+                tvDireccion.setVisibility(android.view.View.GONE);
+            }
+        }
+
         // Tags
         setTags(tipoDeporte,
                 findViewById(R.id.tvTag1),
@@ -65,7 +75,7 @@ public class PistaInfoActivity extends AppCompatActivity {
         // Reseñas
         setReviews(tipoDeporte);
 
-        // Cargar imágenes
+        // Imágenes
         cargarImagenes();
 
         // Botón Reservar
@@ -115,9 +125,7 @@ public class PistaInfoActivity extends AppCompatActivity {
                             vp.setAdapter(new ImageSliderAdapterUrl(
                                     urls, imagenRes));
                         } else {
-                            List<Integer> imgs = new ArrayList<>();
-                            imgs.add(imagenRes);
-                            vp.setAdapter(new ImageSliderAdapter(imgs));
+                            setImagenLocal();
                         }
                     } catch (Exception e) { setImagenLocal(); }
                 });

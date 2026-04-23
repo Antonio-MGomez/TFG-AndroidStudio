@@ -75,6 +75,18 @@ public class HomeActivity extends AppCompatActivity {
                                 double precio  = p.optDouble("precio_hora", 0);
                                 String desc    = p.optString("descripcion", "");
 
+                                // Dirección desde instalaciones
+                                String direccion = "";
+                                if (p.has("instalaciones")
+                                        && !p.isNull("instalaciones")) {
+                                    Object instObj = p.get("instalaciones");
+                                    if (instObj instanceof JSONObject) {
+                                        direccion = ((JSONObject) instObj)
+                                                .optString("direccion", "");
+                                    }
+                                }
+
+                                // Imagen principal
                                 String imgUrl = "";
                                 if (p.has("imagenes_pista")) {
                                     JSONArray imgs = p.getJSONArray("imagenes_pista");
@@ -90,9 +102,10 @@ public class HomeActivity extends AppCompatActivity {
                                                 .optString("url_imagen","");
                                     }
                                 }
+
                                 popularItems.add(new PopularItem(
                                         id, nombre, deporte,
-                                        (int) precio, imgUrl, desc));
+                                        (int) precio, imgUrl, desc, direccion));
                             }
                             popularAdapter.notifyDataSetChanged();
 
@@ -121,13 +134,13 @@ public class HomeActivity extends AppCompatActivity {
         popularItems.clear();
         popularItems.add(new PopularItem(
                 "09b0e24c-79db-482a-8cf2-2c33a3e1dddf",
-                "Pista Tenis", "Tenis", 12, "", ""));
+                "Pista Tenis", "Tenis", 12, "", "", ""));
         popularItems.add(new PopularItem(
                 "99a95eae-e5cb-49f5-8475-43a659a1fd4a",
-                "Pista Padel 1", "Padel", 10, "", ""));
+                "Pista Padel 1", "Padel", 10, "", "", ""));
         popularItems.add(new PopularItem(
                 "eb1707df-023f-4353-ad4c-3a6ebb27f0de",
-                "Pista Futbol Sala", "Futbol Sala", 10, "", ""));
+                "Pista Futbol Sala", "Futbol Sala", 10, "", "", ""));
         popularAdapter.notifyDataSetChanged();
     }
 
@@ -140,6 +153,7 @@ public class HomeActivity extends AppCompatActivity {
         intent.putExtra("imagen_res",   getImagenLocal(item.deporte));
         intent.putExtra("imagen_url",   item.imagenUrl);
         intent.putExtra("descripcion",  item.descripcion);
+        intent.putExtra("direccion",    item.direccion);
         startActivity(intent);
     }
 
@@ -154,18 +168,20 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     static class PopularItem {
-        String id, nombre, deporte, imagenUrl, descripcion;
+        String id, nombre, deporte, imagenUrl, descripcion, direccion;
         int    precio;
         float  rating = 4.8f;
 
         PopularItem(String id, String nombre, String deporte,
-                    int precio, String imagenUrl, String descripcion) {
+                    int precio, String imagenUrl,
+                    String descripcion, String direccion) {
             this.id          = id;
             this.nombre      = nombre;
             this.deporte     = deporte;
             this.precio      = precio;
             this.imagenUrl   = imagenUrl;
             this.descripcion = descripcion;
+            this.direccion   = direccion;
         }
     }
 
@@ -184,7 +200,9 @@ public class HomeActivity extends AppCompatActivity {
         public void onBindViewHolder(VH holder, int position) {
             PopularItem item = list.get(position);
             holder.tvName.setText(item.nombre);
-            holder.tvDistance.setText(item.deporte);
+            holder.tvDistance.setText(
+                    item.direccion != null && !item.direccion.isEmpty()
+                            ? item.direccion : item.deporte);
             holder.tvRating.setText(String.valueOf(item.rating));
 
             if (item.imagenUrl != null && !item.imagenUrl.isEmpty()) {

@@ -8,6 +8,7 @@
     android:orientation="vertical"
     android:background="#F2F4F8">
 
+    <!-- HEADER AZUL -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -109,15 +110,18 @@
             android:orientation="vertical"
             android:gravity="center">
             <TextView
-                android:id="@+id/tvMiembro"
+                android:id="@+id/tvFechaRegistro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="⭐"
-                android:textSize="28sp"/>
+                android:text="--"
+                android:textColor="#1E4DB7"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/miembro"
+                android:text="Registro"
                 android:textColor="#6B7280"
                 android:textSize="13sp"/>
         </LinearLayout>
@@ -234,7 +238,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Modo nocturno -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
@@ -259,7 +262,6 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#F2F4F8" android:layout_marginStart="56dp"/>
 
-                    <!-- Notificaciones -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
@@ -284,7 +286,6 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#F2F4F8" android:layout_marginStart="56dp"/>
 
-                    <!-- Idioma -->
                     <LinearLayout
                         android:id="@+id/btnIdioma"
                         android:layout_width="match_parent"
@@ -339,6 +340,7 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/btnAyudaSoporte"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:orientation="horizontal"
@@ -362,6 +364,7 @@
                         android:background="#F2F4F8" android:layout_marginStart="56dp"/>
 
                     <LinearLayout
+                        android:id="@+id/btnTerminos"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:orientation="horizontal"
