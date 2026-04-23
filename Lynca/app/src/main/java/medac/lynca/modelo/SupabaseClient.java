@@ -134,12 +134,13 @@ public class SupabaseClient {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  PISTAS — Obtener todas con imágenes desde Supabase
+    //  PISTAS — Con imágenes y dirección de instalación
     // ════════════════════════════════════════════════════════════
     public void getPistasConImagenes(Callback callback) {
         String url = SupabaseConfig.REST_URL
                 + "/pistas?select=id,nombre,tipo_deporte,precio_hora,"
-                + "descripcion,imagenes_pista(url_imagen,es_principal)";
+                + "descripcion,instalaciones(direccion),"
+                + "imagenes_pista(url_imagen,es_principal)";
 
         Request req = new Request.Builder()
                 .url(url)
@@ -152,7 +153,7 @@ public class SupabaseClient {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  PISTAS — Obtener con filtro de deporte
+    //  PISTAS — Con filtro de deporte
     // ════════════════════════════════════════════════════════════
     public void getPistas(String tipoDeporte, Callback callback) {
         String url = SupabaseConfig.REST_URL + "/pistas?estado=eq.disponible";
@@ -171,7 +172,7 @@ public class SupabaseClient {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  INTERNO
+    //  CUENTA — Eliminar
     // ════════════════════════════════════════════════════════════
     public void deleteAccount(String perfilId, Callback callback) {
         Request req = new Request.Builder()
@@ -183,6 +184,10 @@ public class SupabaseClient {
 
         executeAsync(req, callback);
     }
+
+    // ════════════════════════════════════════════════════════════
+    //  INTERNO
+    // ════════════════════════════════════════════════════════════
     private void executeAsync(Request request, Callback callback) {
         http.newCall(request).enqueue(new okhttp3.Callback() {
             @Override

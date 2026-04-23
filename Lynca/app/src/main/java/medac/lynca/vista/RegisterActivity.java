@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import medac.lynca.R;
 import medac.lynca.modelo.SessionManager;
-import medac.lynca.modelo.SupabaseClient;
+import medac.lynca.modelo.SupabaseConfig;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -26,6 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
@@ -56,63 +57,63 @@ public class RegisterActivity extends AppCompatActivity {
             btnRegister.setText("Registrando...");
 
             String nombreCompleto = nombre + " " + apellidos;
-
-            // Generar UUID para el perfil
-            String nuevoId = UUID.randomUUID().toString();
+            String nuevoId        = UUID.randomUUID().toString();
 
             try {
-                JSONObject perfil = new JSONObject();
-                perfil.put("id",             nuevoId);
-                perfil.put("email",          email);
-                perfil.put("password",       pass);
-                perfil.put("nombre_completo",nombreCompleto);
-                perfil.put("rol", "USER");
-                perfil.put("esta_baneado",   false);
+                org.json.JSONObject perfil = new org.json.JSONObject();
+                perfil.put("id",              nuevoId);
+                perfil.put("email",           email);
+                perfil.put("password",        pass);
+                perfil.put("nombre_completo", nombreCompleto);
+                perfil.put("rol",             "USER");
+                perfil.put("esta_baneado",    false);
 
-                // Llamada directa a REST sin auth
                 new Thread(() -> {
                     try {
                         okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
-                        okhttp3.MediaType JSON = okhttp3.MediaType.get("application/json");
+                        okhttp3.MediaType JSON = okhttp3.MediaType.get(
+                                "application/json");
                         okhttp3.Request req = new okhttp3.Request.Builder()
-                                .url(medac.lynca.modelo.SupabaseConfig.REST_URL + "/perfiles")
-                                .addHeader("apikey", medac.lynca.modelo.SupabaseConfig.ANON_KEY)
+                                .url(SupabaseConfig.REST_URL + "/perfiles")
+                                .addHeader("apikey", SupabaseConfig.ANON_KEY)
                                 .addHeader("Content-Type", "application/json")
                                 .addHeader("Prefer", "return=representation")
-                                .post(okhttp3.RequestBody.create(perfil.toString(), JSON))
+                                .post(okhttp3.RequestBody.create(
+                                        perfil.toString(), JSON))
                                 .build();
 
                         okhttp3.Response response = client.newCall(req).execute();
-                        String body = response.body() != null ? response.body().string() : "[]";
+                        String body = response.body() != null
+                                ? response.body().string() : "[]";
 
                         runOnUiThread(() -> {
                             btnRegister.setEnabled(true);
-                            btnRegister.setText("Registrarse");
+                            btnRegister.setText(
+                                    getString(R.string.registrarse));
 
                             if (response.isSuccessful()) {
                                 try {
                                     JSONArray arr = new JSONArray(body);
                                     if (arr.length() > 0) {
-                                        JSONObject p = arr.getJSONObject(0);
+                                        JSONObject p  = arr.getJSONObject(0);
                                         String pid    = p.getString("id");
                                         String pemail = p.getString("email");
-                                        String pnombre= p.optString("nombre_completo","Usuario");
-                                        SessionManager.getInstance(RegisterActivity.this)
-                                                .saveSession(pid, pemail, pnombre);
-                                        startActivity(new Intent(RegisterActivity.this,
+                                        String pnom   = p.optString(
+                                                "nombre_completo","Usuario");
+                                        SessionManager.getInstance(
+                                                        RegisterActivity.this)
+                                                .saveSession(pid, pemail, pnom);
+                                        startActivity(new Intent(
+                                                RegisterActivity.this,
                                                 HomeActivity.class));
                                         finish();
                                     }
                                 } catch (Exception ex) {
-                                    Toast.makeText(RegisterActivity.this,
-                                            "Registro completado. Inicia sesión.",
-                                            Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(RegisterActivity.this,
-                                            LoginActivity.class));
-                                    finish();
+                                    irAlLogin();
                                 }
                             } else {
-                                if (body.contains("duplicate") || body.contains("unique")) {
+                                if (body.contains("duplicate")
+                                        || body.contains("unique")) {
                                     Toast.makeText(RegisterActivity.this,
                                             "Este email ya está registrado",
                                             Toast.LENGTH_SHORT).show();
@@ -127,23 +128,28 @@ public class RegisterActivity extends AppCompatActivity {
                     } catch (Exception ex) {
                         runOnUiThread(() -> {
                             btnRegister.setEnabled(true);
-                            btnRegister.setText("Registrarse");
+                            btnRegister.setText(
+                                    getString(R.string.registrarse));
                             Toast.makeText(RegisterActivity.this,
-                                    "Error de conexión", Toast.LENGTH_SHORT).show();
+                                    "Error de conexión",
+                                    Toast.LENGTH_SHORT).show();
                         });
                     }
                 }).start();
 
             } catch (Exception e) {
                 btnRegister.setEnabled(true);
-                btnRegister.setText("Registrarse");
-                Toast.makeText(this, "Error inesperado", Toast.LENGTH_SHORT).show();
+                btnRegister.setText(getString(R.string.registrarse));
+                Toast.makeText(this, "Error inesperado",
+                        Toast.LENGTH_SHORT).show();
             }
         });
 
-        tvGoToLogin.setOnClickListener(v -> {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        });
+        tvGoToLogin.setOnClickListener(v -> irAlLogin());
+    }
+
+    private void irAlLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }

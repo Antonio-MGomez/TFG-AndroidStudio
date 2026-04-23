@@ -46,17 +46,20 @@ public class PistaReservaActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pabellon_victor);
 
         pistaId     = getIntent().getStringExtra("pista_id");
         pistaNombre = getIntent().getStringExtra("pista_nombre");
-        imagenRes   = getIntent().getIntExtra("imagen_res", R.drawable.pista_baloncesto_1);
+        imagenRes   = getIntent().getIntExtra("imagen_res",
+                R.drawable.pista_baloncesto_1);
         imagenUrl   = getIntent().getStringExtra("imagen_url");
 
         try {
             precioBase = Integer.parseInt(
-                    getIntent().getStringExtra("precio_hora").replace("€","").trim());
+                    getIntent().getStringExtra("precio_hora")
+                            .replace("€","").trim());
         } catch (Exception e) { precioBase = 10; }
 
         rvDates         = findViewById(R.id.rvDates);
@@ -83,7 +86,8 @@ public class PistaReservaActivity extends AppCompatActivity implements
         if (imagenUrl != null && !imagenUrl.isEmpty()) {
             List<String> urls = new ArrayList<>();
             urls.add(imagenUrl);
-            viewPagerHeader.setAdapter(new ImageSliderAdapterUrl(urls, imagenRes));
+            viewPagerHeader.setAdapter(
+                    new ImageSliderAdapterUrl(urls, imagenRes));
         } else {
             new Thread(() -> {
                 try {
@@ -109,7 +113,8 @@ public class PistaReservaActivity extends AppCompatActivity implements
                             }
                             if (!urls.isEmpty()) {
                                 viewPagerHeader.setAdapter(
-                                        new ImageSliderAdapterUrl(urls, imagenRes));
+                                        new ImageSliderAdapterUrl(
+                                                urls, imagenRes));
                             } else {
                                 setImagenLocal();
                             }
@@ -130,7 +135,6 @@ public class PistaReservaActivity extends AppCompatActivity implements
 
     // ════════════════════════════════════════════════════════════
     //  Horarios desde Supabase
-    //  Formato jsonb: [{"inicio":"14:30","fin":"16:00","estado":"Libre"}]
     // ════════════════════════════════════════════════════════════
     private void cargarHorarios() {
         new Thread(() -> {
@@ -153,13 +157,11 @@ public class PistaReservaActivity extends AppCompatActivity implements
                         if (arr.length() > 0) {
                             JSONObject pista = arr.getJSONObject(0);
 
-                            // Precio de Supabase
                             if (pista.has("precio_hora")
                                     && !pista.isNull("precio_hora")) {
                                 precioBase = pista.getInt("precio_hora");
                             }
 
-                            // Horario jsonb
                             if (pista.has("horario")
                                     && !pista.isNull("horario")) {
                                 Object horarioObj = pista.get("horario");
@@ -170,16 +172,17 @@ public class PistaReservaActivity extends AppCompatActivity implements
                                     for (int i = 0; i < slots.length(); i++) {
                                         Object slot = slots.get(i);
                                         if (slot instanceof JSONObject) {
-                                            // {"inicio":"14:30","fin":"16:00","estado":"Libre"}
                                             JSONObject s = (JSONObject) slot;
-                                            String estado = s.optString("estado","Libre");
-                                            String inicio = s.optString("inicio","");
+                                            String estado = s.optString(
+                                                    "estado","Libre");
+                                            String inicio = s.optString(
+                                                    "inicio","");
                                             if (!inicio.isEmpty()
-                                                    && estado.equalsIgnoreCase("Libre")) {
+                                                    && estado.equalsIgnoreCase(
+                                                    "Libre")) {
                                                 horasDisponibles.add(inicio);
                                             }
                                         } else {
-                                            // Formato simple ["09:00","10:00"]
                                             horasDisponibles.add(
                                                     slots.getString(i));
                                         }
@@ -187,9 +190,7 @@ public class PistaReservaActivity extends AppCompatActivity implements
                                 }
                             }
                         }
-                    } catch (Exception e) {
-                        // Usar horas por defecto
-                    }
+                    } catch (Exception e) { /* usar horas por defecto */ }
                     updateHoursAndPrice(15, 1.0);
                 });
             } catch (Exception e) {
@@ -254,7 +255,7 @@ public class PistaReservaActivity extends AppCompatActivity implements
                         @Override
                         public void onSuccess(String body) {
                             btnReservar.setEnabled(true);
-                            btnReservar.setText("Reservar");
+                            btnReservar.setText(getString(R.string.reservar));
                             Toast.makeText(PistaReservaActivity.this,
                                     "✅ ¡Reserva confirmada!",
                                     Toast.LENGTH_SHORT).show();
@@ -267,7 +268,7 @@ public class PistaReservaActivity extends AppCompatActivity implements
                         @Override
                         public void onError(String error) {
                             btnReservar.setEnabled(true);
-                            btnReservar.setText("Reservar");
+                            btnReservar.setText(getString(R.string.reservar));
                             Toast.makeText(PistaReservaActivity.this,
                                     "Error al reservar: " + error,
                                     Toast.LENGTH_LONG).show();
@@ -275,8 +276,9 @@ public class PistaReservaActivity extends AppCompatActivity implements
                     });
         } catch (Exception e) {
             btnReservar.setEnabled(true);
-            btnReservar.setText("Reservar");
-            Toast.makeText(this, "Error inesperado", Toast.LENGTH_SHORT).show();
+            btnReservar.setText(getString(R.string.reservar));
+            Toast.makeText(this, "Error inesperado",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -285,7 +287,6 @@ public class PistaReservaActivity extends AppCompatActivity implements
             String[] parts = horaInicio.split(":");
             int h = Integer.parseInt(parts[0]);
             int m = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-            // Sumar 1.5 horas (duración de cada slot)
             int totalMin = h * 60 + m + 90;
             return String.format("%02d:%02d", totalMin / 60, totalMin % 60);
         } catch (Exception e) { return "00:00"; }

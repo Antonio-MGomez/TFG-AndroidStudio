@@ -36,13 +36,14 @@ public class PabellonVictorActivity extends AppCompatActivity implements
     private List<DateModel>     dateList;
     private List<TimeSlotModel> hourList;
 
-    // ID de la pista en la BD de tu compañero
-    // Cámbialo por el UUID real de la pista en Supabase → pistas
-    private static final String PISTA_ID    = "09b0e24c-79db-482a-8cf2-2c33a3e1dddf";
-    private static final int    PRECIO_BASE = 48;
+    private static final String PISTA_ID     = "09b0e24c-79db-482a-8cf2-2c33a3e1dddf";
+    private static final String PISTA_NOMBRE = "Pabellón número cinco";
+    private static final String PISTA_IMG    = "pista_baloncesto_1";
+    private static final int    PRECIO_BASE  = 48;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pabellon_victor);
 
@@ -63,7 +64,6 @@ public class PabellonVictorActivity extends AppCompatActivity implements
     }
 
     private void intentarReservar() {
-        // 1. Buscar hora seleccionada
         String horaInicio = "";
         for (TimeSlotModel slot : hourList) {
             if (slot.isSelected()) { horaInicio = slot.getTime(); break; }
@@ -74,18 +74,14 @@ public class PabellonVictorActivity extends AppCompatActivity implements
             return;
         }
 
-        // 2. Comprobar sesión
         SessionManager session = SessionManager.getInstance(this);
         String perfilId = session.getPerfilId();
         if (perfilId == null) {
-            Toast.makeText(this, "Debes iniciar sesión primero",
-                    Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
             return;
         }
 
-        // 3. Construir fecha
-        Calendar cal   = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         DateModel diaSeleccionado = null;
         for (DateModel d : dateList) {
             if (d.isSelected()) { diaSeleccionado = d; break; }
@@ -99,10 +95,8 @@ public class PabellonVictorActivity extends AppCompatActivity implements
                 + String.format("%02d", mes) + "-"
                 + String.format("%02d", numDia);
 
-        // 4. Hora fin
         String horaFin = calcularHoraFin(horaInicio);
 
-        // 5. Enviar a Supabase con los campos correctos de la BD
         try {
             JSONObject reserva = new JSONObject();
             reserva.put("perfil_id",      perfilId);
@@ -120,7 +114,7 @@ public class PabellonVictorActivity extends AppCompatActivity implements
                         @Override
                         public void onSuccess(String body) {
                             btnReservar.setEnabled(true);
-                            btnReservar.setText("Reservar");
+                            btnReservar.setText(getString(R.string.reservar));
                             Toast.makeText(PabellonVictorActivity.this,
                                     "✅ ¡Reserva confirmada!",
                                     Toast.LENGTH_SHORT).show();
@@ -133,17 +127,15 @@ public class PabellonVictorActivity extends AppCompatActivity implements
                         @Override
                         public void onError(String error) {
                             btnReservar.setEnabled(true);
-                            btnReservar.setText("Reservar");
+                            btnReservar.setText(getString(R.string.reservar));
                             Toast.makeText(PabellonVictorActivity.this,
                                     "Error al reservar: " + error,
                                     Toast.LENGTH_LONG).show();
                         }
                     });
-
         } catch (Exception e) {
             btnReservar.setEnabled(true);
-            btnReservar.setText("Reservar");
-            Toast.makeText(this, "Error inesperado", Toast.LENGTH_SHORT).show();
+            btnReservar.setText(getString(R.string.reservar));
         }
     }
 

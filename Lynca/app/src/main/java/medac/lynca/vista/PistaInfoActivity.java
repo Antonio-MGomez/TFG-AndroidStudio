@@ -10,13 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import medac.lynca.R;
-import medac.lynca.modelo.SupabaseClient;
 import medac.lynca.modelo.SupabaseConfig;
 
 public class PistaInfoActivity extends AppCompatActivity {
@@ -27,6 +25,7 @@ public class PistaInfoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pista_info);
 
@@ -34,7 +33,8 @@ public class PistaInfoActivity extends AppCompatActivity {
         pistaNombre = getIntent().getStringExtra("pista_nombre");
         tipoDeporte = getIntent().getStringExtra("tipo_deporte");
         precioHora  = getIntent().getStringExtra("precio_hora");
-        imagenRes   = getIntent().getIntExtra("imagen_res", R.drawable.pista_baloncesto_1);
+        imagenRes   = getIntent().getIntExtra("imagen_res",
+                R.drawable.pista_baloncesto_1);
         imagenUrl   = getIntent().getStringExtra("imagen_url");
 
         // Nombre y precio
@@ -44,8 +44,27 @@ public class PistaInfoActivity extends AppCompatActivity {
         if (tvPrecio != null) tvPrecio.setText("€" + precioHora + " / hora");
 
         // Descripción
+        String descripcion = getIntent().getStringExtra("descripcion");
         TextView tvDesc = findViewById(R.id.tvDescripcion);
-        if (tvDesc != null) tvDesc.setText(getDescripcion(tipoDeporte));
+        if (tvDesc != null) {
+            if (descripcion != null && !descripcion.isEmpty()) {
+                tvDesc.setText(descripcion);
+            } else {
+                tvDesc.setText(getDescripcion(tipoDeporte));
+            }
+        }
+
+        // Dirección
+        String direccion = getIntent().getStringExtra("direccion");
+        TextView tvDireccion = findViewById(R.id.tvDireccion);
+        if (tvDireccion != null) {
+            if (direccion != null && !direccion.isEmpty()) {
+                tvDireccion.setText("📍 " + direccion);
+                tvDireccion.setVisibility(android.view.View.VISIBLE);
+            } else {
+                tvDireccion.setVisibility(android.view.View.GONE);
+            }
+        }
 
         // Tags
         setTags(tipoDeporte,
@@ -56,7 +75,7 @@ public class PistaInfoActivity extends AppCompatActivity {
         // Reseñas
         setReviews(tipoDeporte);
 
-        // Cargar imágenes desde Supabase
+        // Imágenes
         cargarImagenes();
 
         // Botón Reservar
@@ -76,21 +95,17 @@ public class PistaInfoActivity extends AppCompatActivity {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Cargar imágenes desde Supabase
+    //  Imágenes desde Supabase
     // ════════════════════════════════════════════════════════════
     private void cargarImagenes() {
-        String url = SupabaseConfig.REST_URL
-                + "/imagenes_pista?pista_id=eq." + pistaId;
-
         new Thread(() -> {
             try {
                 okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
                 okhttp3.Request req = new okhttp3.Request.Builder()
-                        .url(url)
+                        .url(SupabaseConfig.REST_URL
+                                + "/imagenes_pista?pista_id=eq." + pistaId)
                         .addHeader("apikey", SupabaseConfig.ANON_KEY)
-                        .addHeader("Content-Type", "application/json")
-                        .get()
-                        .build();
+                        .get().build();
 
                 okhttp3.Response response = client.newCall(req).execute();
                 String body = response.body() != null
@@ -101,41 +116,34 @@ public class PistaInfoActivity extends AppCompatActivity {
                         JSONArray arr = new JSONArray(body);
                         List<String> urls = new ArrayList<>();
                         for (int i = 0; i < arr.length(); i++) {
-                            String imgUrl = arr.getJSONObject(i)
+                            String u = arr.getJSONObject(i)
                                     .optString("url_imagen", "");
-                            if (!imgUrl.isEmpty()) urls.add(imgUrl);
+                            if (!u.isEmpty()) urls.add(u);
                         }
-
-                        ViewPager2 viewPager = findViewById(R.id.viewPagerHeader);
-                        if (!urls.isEmpty()) {
-                            viewPager.setAdapter(
-                                    new ImageSliderAdapterUrl(urls, imagenRes));
-                        } else {
-                            // Fallback imagen local
-                            List<Integer> imgs = new ArrayList<>();
-                            imgs.add(imagenRes);
-                            viewPager.setAdapter(new ImageSliderAdapter(imgs));
-                        }
-                    } catch (Exception e) {
-                        List<Integer> imgs = new ArrayList<>();
-                        imgs.add(imagenRes);
                         ViewPager2 vp = findViewById(R.id.viewPagerHeader);
-                        if (vp != null) vp.setAdapter(new ImageSliderAdapter(imgs));
-                    }
+                        if (!urls.isEmpty()) {
+                            vp.setAdapter(new ImageSliderAdapterUrl(
+                                    urls, imagenRes));
+                        } else {
+                            setImagenLocal();
+                        }
+                    } catch (Exception e) { setImagenLocal(); }
                 });
             } catch (Exception e) {
-                runOnUiThread(() -> {
-                    List<Integer> imgs = new ArrayList<>();
-                    imgs.add(imagenRes);
-                    ViewPager2 vp = findViewById(R.id.viewPagerHeader);
-                    if (vp != null) vp.setAdapter(new ImageSliderAdapter(imgs));
-                });
+                runOnUiThread(this::setImagenLocal);
             }
         }).start();
     }
 
+    private void setImagenLocal() {
+        List<Integer> imgs = new ArrayList<>();
+        imgs.add(imagenRes);
+        ViewPager2 vp = findViewById(R.id.viewPagerHeader);
+        if (vp != null) vp.setAdapter(new ImageSliderAdapter(imgs));
+    }
+
     // ════════════════════════════════════════════════════════════
-    //  Reseñas distintas por deporte
+    //  Reseñas por deporte
     // ════════════════════════════════════════════════════════════
     private void setReviews(String deporte) {
         ImageView img1  = findViewById(R.id.imgUser1);
@@ -186,6 +194,9 @@ public class PistaInfoActivity extends AppCompatActivity {
         }
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Tags por deporte
+    // ════════════════════════════════════════════════════════════
     private void setTags(String deporte, TextView t1, TextView t2, TextView t3) {
         if (deporte == null) return;
         switch (deporte) {
@@ -214,6 +225,9 @@ public class PistaInfoActivity extends AppCompatActivity {
         }
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Descripción por deporte
+    // ════════════════════════════════════════════════════════════
     private String getDescripcion(String deporte) {
         if (deporte == null) return "Instalación deportiva de alta calidad.";
         switch (deporte) {

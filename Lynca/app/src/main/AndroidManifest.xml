@@ -35,5 +35,8 @@
         <activity android:name=".vista.PistaInfoActivity"   android:exported="true"/>
         <activity android:name=".vista.PistaReservaActivity" android:exported="true"/>
         <activity android:name=".vista.PerfilActivity" android:exported="true"/>
+        <activity android:name=".vista.EditarPerfilActivity" android:exported="true"/>
+        <activity android:name=".vista.AyudaActivity"    android:exported="true"/>
+        <activity android:name=".vista.TerminosActivity" android:exported="true"/>
     </application>
 </manifest>
