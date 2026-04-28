@@ -22,7 +22,6 @@ import java.util.List;
 import medac.lynca.R;
 import medac.lynca.modelo.DateModel;
 import medac.lynca.modelo.SessionManager;
-import medac.lynca.modelo.SupabaseClient;
 import medac.lynca.modelo.SupabaseConfig;
 import medac.lynca.modelo.TimeSlotModel;
 
@@ -40,7 +39,12 @@ public class PistaReservaActivity extends AppCompatActivity implements
 
     private String pistaId, pistaNombre, imagenUrl;
     private int    imagenRes;
-    private int    precioBase = 10;
+    private int    precioBase  = 10;
+    private int    precioFinal = 10;
+
+    private String fechaSeleccionada  = "";
+    private String horaInicioSelected = "";
+    private String horaFinSelected    = "";
 
     private List<String> horasDisponibles = new ArrayList<>();
 
@@ -61,6 +65,8 @@ public class PistaReservaActivity extends AppCompatActivity implements
                     getIntent().getStringExtra("precio_hora")
                             .replace("€","").trim());
         } catch (Exception e) { precioBase = 10; }
+
+        precioFinal = precioBase;
 
         rvDates         = findViewById(R.id.rvDates);
         rvHours         = findViewById(R.id.rvHours);
@@ -159,7 +165,8 @@ public class PistaReservaActivity extends AppCompatActivity implements
 
                             if (pista.has("precio_hora")
                                     && !pista.isNull("precio_hora")) {
-                                precioBase = pista.getInt("precio_hora");
+                                precioBase  = pista.getInt("precio_hora");
+                                precioFinal = precioBase;
                             }
 
                             if (pista.has("horario")
@@ -191,23 +198,28 @@ public class PistaReservaActivity extends AppCompatActivity implements
                             }
                         }
                     } catch (Exception e) { /* usar horas por defecto */ }
-                    updateHoursAndPrice(15, 1.0);
+                    updateHoursAndPrice(
+                            dateList.get(0).getDayNumber(), 1.0);
                 });
             } catch (Exception e) {
-                runOnUiThread(() -> updateHoursAndPrice(15, 1.0));
+                runOnUiThread(() -> updateHoursAndPrice(
+                        dateList.get(0).getDayNumber(), 1.0));
             }
         }).start();
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Reservar
+    //  Ir a pantalla de pago
     // ════════════════════════════════════════════════════════════
     private void intentarReservar() {
-        String horaInicio = "";
+        horaInicioSelected = "";
         for (TimeSlotModel slot : hourList) {
-            if (slot.isSelected()) { horaInicio = slot.getTime(); break; }
+            if (slot.isSelected()) {
+                horaInicioSelected = slot.getTime();
+                break;
+            }
         }
-        if (horaInicio.isEmpty()) {
+        if (horaInicioSelected.isEmpty()) {
             Toast.makeText(this, "Selecciona una hora primero",
                     Toast.LENGTH_SHORT).show();
             return;
@@ -222,64 +234,23 @@ public class PistaReservaActivity extends AppCompatActivity implements
             return;
         }
 
-        Calendar cal = Calendar.getInstance();
-        DateModel diaSeleccionado = null;
-        for (DateModel d : dateList) {
-            if (d.isSelected()) { diaSeleccionado = d; break; }
-        }
-        int numDia = diaSeleccionado != null
-                ? diaSeleccionado.getDayNumber()
-                : cal.get(Calendar.DAY_OF_MONTH);
-        int mes  = cal.get(Calendar.MONTH) + 1;
-        int anyo = cal.get(Calendar.YEAR);
-        String fecha = anyo + "-"
-                + String.format("%02d", mes) + "-"
-                + String.format("%02d", numDia);
+        horaFinSelected = calcularHoraFin(horaInicioSelected);
 
-        String horaFin = calcularHoraFin(horaInicio);
-
-        try {
-            JSONObject reserva = new JSONObject();
-            reserva.put("perfil_id",      perfilId);
-            reserva.put("pista_id",       pistaId);
-            reserva.put("fecha_reserva",  fecha);
-            reserva.put("hora_inicio",    horaInicio + ":00");
-            reserva.put("hora_fin",       horaFin + ":00");
-            reserva.put("estado_reserva", "Confirmada");
-
-            btnReservar.setEnabled(false);
-            btnReservar.setText("Reservando...");
-
-            SupabaseClient.getInstance().insertReserva(reserva,
-                    new SupabaseClient.Callback() {
-                        @Override
-                        public void onSuccess(String body) {
-                            btnReservar.setEnabled(true);
-                            btnReservar.setText(getString(R.string.reservar));
-                            Toast.makeText(PistaReservaActivity.this,
-                                    "✅ ¡Reserva confirmada!",
-                                    Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(PistaReservaActivity.this,
-                                    ProfileActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                            btnReservar.setEnabled(true);
-                            btnReservar.setText(getString(R.string.reservar));
-                            Toast.makeText(PistaReservaActivity.this,
-                                    "Error al reservar: " + error,
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-        } catch (Exception e) {
-            btnReservar.setEnabled(true);
-            btnReservar.setText(getString(R.string.reservar));
-            Toast.makeText(this, "Error inesperado",
-                    Toast.LENGTH_SHORT).show();
-        }
+        // Ir a pantalla de pago
+        Intent intent = new Intent(this, PagoActivity.class);
+        intent.putExtra("pista_nombre", pistaNombre);
+        intent.putExtra("tipo_deporte",
+                getIntent().getStringExtra("tipo_deporte"));
+        intent.putExtra("fecha",       fechaSeleccionada);
+        intent.putExtra("hora_inicio", horaInicioSelected);
+        intent.putExtra("hora_fin",    horaFinSelected);
+        intent.putExtra("precio",      String.valueOf(precioFinal));
+        intent.putExtra("imagen_url",  imagenUrl);
+        intent.putExtra("imagen_res",  imagenRes);
+        intent.putExtra("direccion",
+                getIntent().getStringExtra("direccion"));
+        intent.putExtra("pista_id",    pistaId);
+        startActivity(intent);
     }
 
     private String calcularHoraFin(String horaInicio) {
@@ -292,20 +263,36 @@ public class PistaReservaActivity extends AppCompatActivity implements
         } catch (Exception e) { return "00:00"; }
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Fechas dinámicas desde hoy
+    // ════════════════════════════════════════════════════════════
     private void setupDates() {
         dateList = new ArrayList<>();
-        dateList.add(new DateModel("Lunes",   15, true,  1.0));
-        dateList.add(new DateModel("Martes",  16, false, 1.0));
-        dateList.add(new DateModel("Miérc",   17, false, 1.2));
-        dateList.add(new DateModel("Jueves",  18, false, 1.0));
-        dateList.add(new DateModel("Viernes", 19, false, 1.3));
-        dateList.add(new DateModel("Sábado",  20, false, 1.5));
-        dateList.add(new DateModel("Domingo", 21, false, 1.5));
+
+        Calendar cal = Calendar.getInstance();
+        String[] dias = {"Dom","Lun","Mar","Mié","Jue","Vie","Sáb"};
+        double[] multiplicadores = {1.5, 1.0, 1.0, 1.2, 1.0, 1.3, 1.5};
+
+        for (int i = 0; i < 7; i++) {
+            Calendar dia = (Calendar) cal.clone();
+            dia.add(Calendar.DAY_OF_MONTH, i);
+            int numeroDia    = dia.get(Calendar.DAY_OF_MONTH);
+            int diaSemana    = dia.get(Calendar.DAY_OF_WEEK) - 1;
+            String nombreDia = dias[diaSemana];
+            double mult      = multiplicadores[diaSemana];
+            dateList.add(new DateModel(nombreDia, numeroDia, i == 0, mult));
+        }
 
         dateAdapter = new DateAdapter(dateList, this);
-        rvDates.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvDates.setLayoutManager(new LinearLayoutManager(
+                this, LinearLayoutManager.HORIZONTAL, false));
         rvDates.setAdapter(dateAdapter);
+
+        // Fecha inicial = hoy
+        Calendar hoy = Calendar.getInstance();
+        fechaSeleccionada = hoy.get(Calendar.YEAR) + "-"
+                + String.format("%02d", hoy.get(Calendar.MONTH) + 1) + "-"
+                + String.format("%02d", hoy.get(Calendar.DAY_OF_MONTH));
     }
 
     @Override
@@ -313,6 +300,13 @@ public class PistaReservaActivity extends AppCompatActivity implements
         for (int i = 0; i < dateList.size(); i++)
             dateList.get(i).setSelected(i == pos);
         dateAdapter.notifyDataSetChanged();
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, pos);
+        fechaSeleccionada = cal.get(Calendar.YEAR) + "-"
+                + String.format("%02d", cal.get(Calendar.MONTH) + 1) + "-"
+                + String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
+
         updateHoursAndPrice(
                 dateList.get(pos).getDayNumber(),
                 dateList.get(pos).getPriceMultiplier());
@@ -333,6 +327,7 @@ public class PistaReservaActivity extends AppCompatActivity implements
 
     private void updateHoursAndPrice(int day, double mult) {
         int base = (int) (precioBase * mult);
+        precioFinal = base;
         tvPriceMain.setText("€" + base);
         hourList = new ArrayList<>();
 
@@ -346,13 +341,8 @@ public class PistaReservaActivity extends AppCompatActivity implements
             };
         }
 
-        boolean esFinDeSemana = (day == 20 || day == 21);
         for (String h : horas) {
-            boolean reservada = esFinDeSemana
-                    || (day == 15 && h.equals("21:00"))
-                    || (day == 16 && h.equals("18:00"))
-                    || (day == 17 && h.equals("19:00"));
-            hourList.add(new TimeSlotModel(h, "€" + base, reservada));
+            hourList.add(new TimeSlotModel(h, "€" + base, false));
         }
 
         hourAdapter = new HourAdapter(hourList, this);

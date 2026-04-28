@@ -24,8 +24,9 @@
             android:layout_height="88dp"
             android:src="@drawable/foto_jose"
             android:scaleType="centerCrop"
+            android:clipToOutline="true"
+            android:background="@drawable/bg_circle_white"
             android:layout_marginBottom="12dp"/>
-
         <TextView
             android:id="@+id/tvNombrePerfil"
             android:layout_width="wrap_content"

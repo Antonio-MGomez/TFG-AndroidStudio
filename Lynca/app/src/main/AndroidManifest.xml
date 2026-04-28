@@ -38,5 +38,7 @@
         <activity android:name=".vista.EditarPerfilActivity" android:exported="true"/>
         <activity android:name=".vista.AyudaActivity"    android:exported="true"/>
         <activity android:name=".vista.TerminosActivity" android:exported="true"/>
+        <activity android:name=".vista.ConfirmacionReservaActivity" android:exported="false"/>
+        <activity android:name=".vista.PagoActivity" android:exported="false"/>
     </application>
 </manifest>

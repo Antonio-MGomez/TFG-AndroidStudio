@@ -17,6 +17,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- HEADER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,14 +54,19 @@
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/btnNotification"
+                    android:id="@+id/imgFotoPerfil"
                     android:layout_width="42dp"
                     android:layout_height="42dp"
-                    android:src="@android:drawable/ic_dialog_info"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"/>
+                    android:src="@drawable/foto_jose"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:background="@drawable/bg_circle_white"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
             </LinearLayout>
 
+            <!-- BUSCADOR -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,6 +103,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- FEATURED -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -180,6 +187,7 @@
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
+            <!-- POPULAR NEAR YOU -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -207,6 +215,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- BOTTOM NAVIGATION -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
@@ -235,7 +244,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/search" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/search" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navBookings"
@@ -246,7 +256,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_agenda"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/bookings" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/bookings" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/navProfile"
@@ -257,7 +268,8 @@
             <ImageView android:layout_width="24dp" android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_myplaces"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/profile" android:textSize="11sp" android:textColor="#6B7280"/>
+                android:text="@string/profile" android:textSize="11sp"
+                android:textColor="#6B7280"/>
         </LinearLayout>
 
     </LinearLayout>
