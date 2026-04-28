@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -35,9 +36,14 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
-    // NUEVO: para conectar con Supabase
+    // Supabase
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Firebase y Google Sign-In
+    implementation platform('com.google.firebase:firebase-bom:34.12.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.android.gms:play-services-auth:21.0.0'
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

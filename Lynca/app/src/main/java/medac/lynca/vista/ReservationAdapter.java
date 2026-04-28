@@ -6,77 +6,107 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+
 import java.util.List;
+
 import medac.lynca.R;
 import medac.lynca.modelo.ReservationModel;
 
-public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.ViewHolder> {
+public class ReservationAdapter
+        extends RecyclerView.Adapter<ReservationAdapter.VH> {
 
-    private List<ReservationModel> list;
-    private OnCancelClickListener listener;
+    public interface OnCancelListener  { void onCancel(int position); }
+    public interface OnDetailListener  { void onDetail(int position); }
 
-    public interface OnCancelClickListener {
-        void onCancelClick(int position);
-    }
+    private final List<ReservationModel> list;
+    private final OnCancelListener       cancelListener;
+    private final OnDetailListener       detailListener;
 
-    public ReservationAdapter(List<ReservationModel> list, OnCancelClickListener listener) {
-        this.list = list;
-        this.listener = listener;
+    public ReservationAdapter(List<ReservationModel> list,
+                              OnCancelListener cancelListener,
+                              OnDetailListener detailListener) {
+        this.list           = list;
+        this.cancelListener = cancelListener;
+        this.detailListener = detailListener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_reservation, parent, false);
-        return new ViewHolder(v);
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_reservation, parent, false);
+        return new VH(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull VH holder, int position) {
         ReservationModel res = list.get(position);
-        holder.tvTitle.setText(res.getTitle());
+
+        holder.tvName.setText(res.getFacilityName());
         holder.tvTime.setText(res.getTime());
-        holder.tvStatus.setText("● " + res.getStatus());
+        holder.tvStatus.setText(res.getStatus());
 
-        // OCULTAR BOTÓN CANCELAR SI ES PISTA PASADA
-        if (res.getStatus().equalsIgnoreCase("Finalizada")) {
-            holder.btnCancel.setVisibility(View.GONE);
+        // Cargar imagen desde URL o fallback local
+        if (res.getImagenUrl() != null && !res.getImagenUrl().isEmpty()) {
+            Glide.with(holder.img.getContext())
+                    .load(res.getImagenUrl())
+                    .placeholder(getImagenRes(holder, res))
+                    .error(getImagenRes(holder, res))
+                    .centerCrop()
+                    .into(holder.img);
         } else {
-            holder.btnCancel.setVisibility(View.VISIBLE);
+            holder.img.setImageResource(getImagenRes(holder, res));
         }
 
-        // Cargar imagen de drawable
-        int imageId = holder.itemView.getContext().getResources().getIdentifier(
-                res.getImageResource(), "drawable", holder.itemView.getContext().getPackageName());
-
-        if (imageId != 0) {
-            holder.img.setImageResource(imageId);
-        } else {
-            holder.img.setImageResource(android.R.drawable.ic_menu_gallery);
+        // Botón cancelar
+        if (holder.btnCancel != null) {
+            holder.btnCancel.setOnClickListener(v -> {
+                if (cancelListener != null)
+                    cancelListener.onCancel(holder.getAdapterPosition());
+            });
         }
 
-        holder.btnCancel.setOnClickListener(v -> listener.onCancelClick(position));
+        // Botón detalles
+        if (holder.btnDetail != null) {
+            holder.btnDetail.setOnClickListener(v -> {
+                if (detailListener != null)
+                    detailListener.onDetail(holder.getAdapterPosition());
+            });
+        }
+    }
+
+    private int getImagenRes(VH holder, ReservationModel res) {
+        String deporte = res.getTipoDeporte();
+        if (deporte == null) return R.drawable.pista_baloncesto_1;
+        switch (deporte) {
+            case "Tenis":  return R.drawable.pista_tenis;
+            case "Pádel":
+            case "Padel":  return R.drawable.pista_padel;
+            default:       return R.drawable.pista_baloncesto_1;
+        }
     }
 
     @Override
-    public int getItemCount() {
-        return list.size();
-    }
+    public int getItemCount() { return list.size(); }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvTime, tvStatus;
+    static class VH extends RecyclerView.ViewHolder {
         ImageView img;
-        Button btnCancel;
+        TextView  tvName, tvTime, tvStatus;
+        Button    btnCancel, btnDetail;
 
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvResTitle);
-            tvTime = itemView.findViewById(R.id.tvResTime);
-            tvStatus = itemView.findViewById(R.id.tvResStatus);
-            img = itemView.findViewById(R.id.imgReserva);
-            btnCancel = itemView.findViewById(R.id.btnCancel);
+        VH(@NonNull View v) {
+            super(v);
+            img      = v.findViewById(R.id.imgReservation);
+            tvName   = v.findViewById(R.id.tvReservationName);
+            tvTime   = v.findViewById(R.id.tvReservationTime);
+            tvStatus = v.findViewById(R.id.tvReservationStatus);
+            btnCancel = v.findViewById(R.id.btnCancelReservation);
+            btnDetail = v.findViewById(R.id.btnDetailReservation);
         }
     }
 }

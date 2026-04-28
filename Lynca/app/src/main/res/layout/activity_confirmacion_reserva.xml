@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2F4F8">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- HEADER VERDE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1E4DB7"
+            android:orientation="vertical"
+            android:paddingTop="60dp"
+            android:paddingBottom="32dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅"
+                android:textSize="64sp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¡Reserva confirmada!"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tu pista está reservada"
+                android:textColor="#99FFFFFF"
+                android:textSize="15sp"/>
+
+        </LinearLayout>
+
+        <!-- CONTENIDO -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- IMAGEN Y NOMBRE PISTA -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/imgConfirmacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/pista_baloncesto_1"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvConfNombrePista"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nombre pista"
+                            android:textColor="#111827"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <TextView
+                            android:id="@+id/tvConfDireccion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📍"
+                            android:textColor="#6B7280"
+                            android:textSize="13sp"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- TÍTULO DETALLES -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DETALLES DE LA RESERVA"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp"/>
+
+            <!-- DETALLES -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Fecha -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+                        <TextView android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="📅" android:textSize="18sp"/>
+                        <TextView android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:text="Fecha"
+                            android:textColor="#6B7280" android:textSize="14sp"/>
+                        <TextView
+                            android:id="@+id/tvConfFecha"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="#111827"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginHorizontal="16dp"/>
+
+                    <!-- Hora -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+                        <TextView android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="🕐" android:textSize="18sp"/>
+                        <TextView android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:text="Hora"
+                            android:textColor="#6B7280" android:textSize="14sp"/>
+                        <TextView
+                            android:id="@+id/tvConfHora"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="#111827"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginHorizontal="16dp"/>
+
+                    <!-- Deporte -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+                        <TextView android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="🏟️" android:textSize="18sp"/>
+                        <TextView android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:text="Deporte"
+                            android:textColor="#6B7280" android:textSize="14sp"/>
+                        <TextView
+                            android:id="@+id/tvConfDeporte"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="#111827"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#F2F4F8" android:layout_marginHorizontal="16dp"/>
+
+                    <!-- Estado -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+                        <TextView android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="✅" android:textSize="18sp"/>
+                        <TextView android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:text="Estado"
+                            android:textColor="#6B7280" android:textSize="14sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Confirmada"
+                            android:textColor="#16A34A"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- PRECIO -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Total a pagar"
+                            android:textColor="#6B7280"
+                            android:textSize="14sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pago en instalación"
+                            android:textColor="#9CA3AF"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvConfPrecio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="€0"
+                        android:textColor="#1E4DB7"
+                        android:textSize="28sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- BOTONES -->
+            <Button
+                android:id="@+id/btnVerReservas"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Ver mis reservas"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#1E4DB7"
+                android:layout_marginBottom="12dp"/>
+
+            <Button
+                android:id="@+id/btnVolverInicio"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Volver al inicio"
+                android:textColor="#1E4DB7"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FFFFFF"
+                android:layout_marginBottom="32dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

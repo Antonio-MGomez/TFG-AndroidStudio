@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,6 +24,7 @@ import java.util.List;
 import medac.lynca.R;
 import medac.lynca.modelo.SessionManager;
 import medac.lynca.modelo.SupabaseClient;
+import medac.lynca.modelo.SupabaseConfig;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -35,20 +37,32 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        String nombre = SessionManager.getInstance(this).getNombre();
+        SessionManager session = SessionManager.getInstance(this);
+
+        // Nombre de bienvenida
+        String nombre = session.getNombre();
         TextView tvUserName = findViewById(R.id.tvUserName);
         tvUserName.setText(nombre + "!");
 
+        // Foto de perfil circular → va al perfil al hacer clic
+        ImageView imgFotoPerfil = findViewById(R.id.imgFotoPerfil);
+        if (imgFotoPerfil != null) {
+            cargarFotoPerfil(imgFotoPerfil, session.getPerfilId());
+            imgFotoPerfil.setOnClickListener(v ->
+                    startActivity(new Intent(this, PerfilActivity.class)));
+        }
+
+        // Botones
         findViewById(R.id.btnBookNow).setOnClickListener(v -> {
             if (!popularItems.isEmpty()) abrirPista(popularItems.get(0));
         });
         findViewById(R.id.cardFeatured).setOnClickListener(v -> {
             if (!popularItems.isEmpty()) abrirPista(popularItems.get(0));
         });
-
         findViewById(R.id.btnSearch).setOnClickListener(v ->
                 startActivity(new Intent(this, SearchActivity.class)));
 
+        // RecyclerView
         RecyclerView rv = findViewById(R.id.rvPopular);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setNestedScrollingEnabled(false);
@@ -59,6 +73,71 @@ public class HomeActivity extends AppCompatActivity {
         cargarPistas();
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Foto de perfil circular desde Supabase
+    // ════════════════════════════════════════════════════════════
+    private void cargarFotoPerfil(ImageView imgView, String perfilId) {
+        if (perfilId == null) {
+            Glide.with(this).load(R.drawable.foto_jose)
+                    .transform(new CircleCrop()).into(imgView);
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                okhttp3.Request req = new okhttp3.Request.Builder()
+                        .url(SupabaseConfig.REST_URL
+                                + "/perfiles?id=eq." + perfilId
+                                + "&select=foto_url")
+                        .addHeader("apikey", SupabaseConfig.ANON_KEY)
+                        .get().build();
+
+                okhttp3.Response response = client.newCall(req).execute();
+                String body = response.body() != null
+                        ? response.body().string() : "[]";
+
+                runOnUiThread(() -> {
+                    try {
+                        JSONArray arr = new JSONArray(body);
+                        String fotoUrl = "";
+                        if (arr.length() > 0) {
+                            fotoUrl = arr.getJSONObject(0)
+                                    .optString("foto_url", "");
+                        }
+                        if (!fotoUrl.isEmpty()) {
+                            Glide.with(HomeActivity.this)
+                                    .load(fotoUrl)
+                                    .transform(new CircleCrop())
+                                    .placeholder(R.drawable.foto_jose)
+                                    .error(R.drawable.foto_jose)
+                                    .into(imgView);
+                        } else {
+                            Glide.with(HomeActivity.this)
+                                    .load(R.drawable.foto_jose)
+                                    .transform(new CircleCrop())
+                                    .into(imgView);
+                        }
+                    } catch (Exception e) {
+                        Glide.with(HomeActivity.this)
+                                .load(R.drawable.foto_jose)
+                                .transform(new CircleCrop())
+                                .into(imgView);
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Glide.with(HomeActivity.this)
+                                .load(R.drawable.foto_jose)
+                                .transform(new CircleCrop())
+                                .into(imgView));
+            }
+        }).start();
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Cargar pistas desde Supabase
+    // ════════════════════════════════════════════════════════════
     private void cargarPistas() {
         SupabaseClient.getInstance().getPistasConImagenes(
                 new SupabaseClient.Callback() {
@@ -75,7 +154,6 @@ public class HomeActivity extends AppCompatActivity {
                                 double precio  = p.optDouble("precio_hora", 0);
                                 String desc    = p.optString("descripcion", "");
 
-                                // Dirección desde instalaciones
                                 String direccion = "";
                                 if (p.has("instalaciones")
                                         && !p.isNull("instalaciones")) {
@@ -86,7 +164,6 @@ public class HomeActivity extends AppCompatActivity {
                                     }
                                 }
 
-                                // Imagen principal
                                 String imgUrl = "";
                                 if (p.has("imagenes_pista")) {
                                     JSONArray imgs = p.getJSONArray("imagenes_pista");
@@ -102,7 +179,6 @@ public class HomeActivity extends AppCompatActivity {
                                                 .optString("url_imagen","");
                                     }
                                 }
-
                                 popularItems.add(new PopularItem(
                                         id, nombre, deporte,
                                         (int) precio, imgUrl, desc, direccion));

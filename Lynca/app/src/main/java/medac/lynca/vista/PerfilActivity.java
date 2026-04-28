@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -12,6 +13,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,17 +44,26 @@ public class PerfilActivity extends AppCompatActivity {
 
         SessionManager session = SessionManager.getInstance(this);
 
+        // Recargar nombre y email
         TextView tvNombre = findViewById(R.id.tvNombrePerfil);
         TextView tvEmail  = findViewById(R.id.tvEmailPerfil);
         if (tvNombre != null) tvNombre.setText(session.getNombre());
         if (tvEmail  != null) tvEmail.setText(session.getEmail());
 
+        // Recargar foto circular
+        ImageView imgPerfil = findViewById(R.id.imgPerfil);
+        if (imgPerfil != null) {
+            cargarFotoPerfil(imgPerfil, session.getPerfilId());
+        }
+
+        // Recargar idioma
         TextView tvIdiomaActual = findViewById(R.id.tvIdiomaActual);
         if (tvIdiomaActual != null) {
             tvIdiomaActual.setText(
                     getNombreIdioma(LanguageHelper.getSavedLanguage(this)));
         }
 
+        // Recargar deporte favorito
         String deporte = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getString("deporte_favorito", "Tenis");
         TextView tvDeporte = findViewById(R.id.tvDeporteFavorito);
@@ -71,23 +84,33 @@ public class PerfilActivity extends AppCompatActivity {
     private void setupUI() {
         SessionManager session = SessionManager.getInstance(this);
 
+        // Nombre y email
         TextView tvNombre = findViewById(R.id.tvNombrePerfil);
         TextView tvEmail  = findViewById(R.id.tvEmailPerfil);
         if (tvNombre != null) tvNombre.setText(session.getNombre());
         if (tvEmail  != null) tvEmail.setText(session.getEmail());
 
+        // Foto circular
+        ImageView imgPerfil = findViewById(R.id.imgPerfil);
+        if (imgPerfil != null) {
+            cargarFotoPerfil(imgPerfil, session.getPerfilId());
+        }
+
+        // Mis Reservas
         LinearLayout btnMisReservas = findViewById(R.id.btnMisReservas);
         if (btnMisReservas != null) {
             btnMisReservas.setOnClickListener(v ->
                     startActivity(new Intent(this, ProfileActivity.class)));
         }
 
+        // Editar Perfil
         LinearLayout btnEditar = findViewById(R.id.btnEditarPerfil);
         if (btnEditar != null) {
             btnEditar.setOnClickListener(v ->
                     startActivity(new Intent(this, EditarPerfilActivity.class)));
         }
 
+        // Modo Nocturno
         Switch switchNocturno = findViewById(R.id.switchModoNocturno);
         if (switchNocturno != null) {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -108,28 +131,33 @@ public class PerfilActivity extends AppCompatActivity {
                     });
         }
 
+        // Selector de Idioma
         LinearLayout btnIdioma = findViewById(R.id.btnIdioma);
         if (btnIdioma != null) {
             btnIdioma.setOnClickListener(v -> mostrarSelectorIdioma());
         }
 
+        // Ayuda
         LinearLayout btnAyuda = findViewById(R.id.btnAyudaSoporte);
         if (btnAyuda != null) {
             btnAyuda.setOnClickListener(v ->
                     startActivity(new Intent(this, AyudaActivity.class)));
         }
 
+        // Términos
         LinearLayout btnTerminos = findViewById(R.id.btnTerminos);
         if (btnTerminos != null) {
             btnTerminos.setOnClickListener(v ->
                     startActivity(new Intent(this, TerminosActivity.class)));
         }
 
+        // Cerrar Sesión
         LinearLayout btnCerrar = findViewById(R.id.btnCerrarSesion);
         if (btnCerrar != null) {
             btnCerrar.setOnClickListener(v -> cerrarSesion());
         }
 
+        // Eliminar Cuenta
         LinearLayout btnEliminar = findViewById(R.id.btnEliminarCuenta);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> confirmarEliminarCuenta());
@@ -139,7 +167,69 @@ public class PerfilActivity extends AppCompatActivity {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Cargar fecha de registro desde Supabase
+    //  Foto de perfil circular
+    // ════════════════════════════════════════════════════════════
+    private void cargarFotoPerfil(ImageView imgView, String perfilId) {
+        if (perfilId == null) {
+            Glide.with(this).load(R.drawable.foto_jose)
+                    .transform(new CircleCrop()).into(imgView);
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                okhttp3.Request req = new okhttp3.Request.Builder()
+                        .url(SupabaseConfig.REST_URL
+                                + "/perfiles?id=eq." + perfilId
+                                + "&select=foto_url")
+                        .addHeader("apikey", SupabaseConfig.ANON_KEY)
+                        .get().build();
+
+                okhttp3.Response response = client.newCall(req).execute();
+                String body = response.body() != null
+                        ? response.body().string() : "[]";
+
+                runOnUiThread(() -> {
+                    try {
+                        JSONArray arr = new JSONArray(body);
+                        String fotoUrl = "";
+                        if (arr.length() > 0) {
+                            fotoUrl = arr.getJSONObject(0)
+                                    .optString("foto_url", "");
+                        }
+                        if (!fotoUrl.isEmpty()) {
+                            Glide.with(PerfilActivity.this)
+                                    .load(fotoUrl)
+                                    .transform(new CircleCrop())
+                                    .placeholder(R.drawable.foto_jose)
+                                    .error(R.drawable.foto_jose)
+                                    .into(imgView);
+                        } else {
+                            Glide.with(PerfilActivity.this)
+                                    .load(R.drawable.foto_jose)
+                                    .transform(new CircleCrop())
+                                    .into(imgView);
+                        }
+                    } catch (Exception e) {
+                        Glide.with(PerfilActivity.this)
+                                .load(R.drawable.foto_jose)
+                                .transform(new CircleCrop())
+                                .into(imgView);
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Glide.with(PerfilActivity.this)
+                                .load(R.drawable.foto_jose)
+                                .transform(new CircleCrop())
+                                .into(imgView));
+            }
+        }).start();
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Fecha de registro
     // ════════════════════════════════════════════════════════════
     private void cargarFechaRegistro(String perfilId) {
         if (perfilId == null) return;
@@ -165,9 +255,7 @@ public class PerfilActivity extends AppCompatActivity {
                             JSONObject perfil = arr.getJSONObject(0);
                             String fechaRaw = perfil.optString(
                                     "fecha_creacion", "");
-
                             if (!fechaRaw.isEmpty()) {
-                                // Formato: 2024-04-09T11:47:20 → "09/04/24"
                                 String[] partes = fechaRaw.split("T")[0].split("-");
                                 if (partes.length == 3) {
                                     String fechaFormato = partes[2] + "/"

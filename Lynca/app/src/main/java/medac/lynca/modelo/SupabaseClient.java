@@ -87,12 +87,17 @@ public class SupabaseClient {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  RESERVAS — Obtener
+    //  RESERVAS — Obtener con datos de pista
     // ════════════════════════════════════════════════════════════
     public void getReservas(String perfilId, Callback callback) {
         String url = SupabaseConfig.REST_URL
                 + "/reservas?perfil_id=eq." + perfilId
-                + "&order=fecha_creacion.desc";
+                + "&order=fecha_creacion.desc"
+                + "&select=id,perfil_id,pista_id,fecha_reserva,"
+                + "hora_inicio,hora_fin,estado_reserva,fecha_creacion,"
+                + "pistas(nombre,tipo_deporte,precio_hora,"
+                + "instalaciones(direccion),"
+                + "imagenes_pista(url_imagen,es_principal))";
 
         Request req = new Request.Builder()
                 .url(url)
@@ -134,7 +139,7 @@ public class SupabaseClient {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  PISTAS — Con imágenes y dirección de instalación
+    //  PISTAS — Con imágenes y dirección
     // ════════════════════════════════════════════════════════════
     public void getPistasConImagenes(Callback callback) {
         String url = SupabaseConfig.REST_URL

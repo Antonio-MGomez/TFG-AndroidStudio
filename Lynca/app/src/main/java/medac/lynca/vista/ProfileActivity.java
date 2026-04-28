@@ -33,27 +33,6 @@ public class ProfileActivity extends AppCompatActivity {
     private final List<ReservationModel> pastList   = new ArrayList<>();
     private boolean showingActive = true;
 
-    private String getNombrePista(String pistaId) {
-        if (pistaId == null) return "Instalación";
-        switch (pistaId) {
-            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf": return "Pista Tenis";
-            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a": return "Pista Pádel 1";
-            case "d3304f3d-c511-41fd-a65f-027566151951": return "Pista Pádel 2";
-            case "eb1707df-023f-4353-ad4c-3a6ebb27f0de": return "Pista Fútbol Sala";
-            default: return "Instalación deportiva";
-        }
-    }
-
-    private String getImagenPorPista(String pistaId) {
-        if (pistaId == null) return "pista_baloncesto_1";
-        switch (pistaId) {
-            case "09b0e24c-79db-482a-8cf2-2c33a3e1dddf": return "pista_tenis";
-            case "99a95eae-e5cb-49f5-8475-43a659a1fd4a":
-            case "d3304f3d-c511-41fd-a65f-027566151951": return "pista_padel";
-            default: return "pista_baloncesto_1";
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         LanguageHelper.applyOnCreate(this);
@@ -118,19 +97,68 @@ public class ProfileActivity extends AppCompatActivity {
         try {
             JSONArray arr = new JSONArray(body);
             for (int i = 0; i < arr.length(); i++) {
-                JSONObject obj    = arr.getJSONObject(i);
-                String estado     = obj.optString("estado_reserva", "Confirmada");
-                String fecha      = obj.optString("fecha_reserva", "");
-                String horaInicio = obj.optString("hora_inicio", "");
-                String horaFin    = obj.optString("hora_fin", "");
-                String pistaId    = obj.optString("pista_id", "");
-
-                String pistaNombre = getNombrePista(pistaId);
-                String imgNombre   = getImagenPorPista(pistaId);
+                JSONObject obj      = arr.getJSONObject(i);
+                String reservaId   = obj.optString("id", "");
+                String estado      = obj.optString("estado_reserva", "Confirmada");
+                String fecha       = obj.optString("fecha_reserva", "");
+                String horaInicio  = obj.optString("hora_inicio", "");
+                String horaFin     = obj.optString("hora_fin", "");
+                String pistaId     = obj.optString("pista_id", "");
                 String timeStr     = fecha + "  " + horaInicio + " - " + horaFin;
 
+                // Datos de la pista via join
+                String pistaNombre = "Instalación deportiva";
+                String tipoDeporte = "";
+                String imagenUrl   = "";
+                String direccion   = "";
+                String precio      = "";
+                String imgNombre   = "pista_baloncesto_1";
+
+                if (obj.has("pistas") && !obj.isNull("pistas")) {
+                    JSONObject pista = obj.getJSONObject("pistas");
+                    pistaNombre = pista.optString("nombre", pistaNombre);
+                    tipoDeporte = pista.optString("tipo_deporte", "");
+                    precio      = pista.optString("precio_hora", "");
+
+                    // Imagen desde imagenes_pista
+                    if (pista.has("imagenes_pista")) {
+                        JSONArray imgs = pista.getJSONArray("imagenes_pista");
+                        for (int j = 0; j < imgs.length(); j++) {
+                            JSONObject img = imgs.getJSONObject(j);
+                            if (img.optBoolean("es_principal", false)) {
+                                imagenUrl = img.optString("url_imagen","");
+                                break;
+                            }
+                        }
+                        if (imagenUrl.isEmpty() && imgs.length() > 0) {
+                            imagenUrl = imgs.getJSONObject(0)
+                                    .optString("url_imagen","");
+                        }
+                    }
+
+                    // Dirección desde instalaciones
+                    if (pista.has("instalaciones")
+                            && !pista.isNull("instalaciones")) {
+                        Object instObj = pista.get("instalaciones");
+                        if (instObj instanceof JSONObject) {
+                            direccion = ((JSONObject) instObj)
+                                    .optString("direccion","");
+                        }
+                    }
+
+                    // Imagen local fallback
+                    switch (tipoDeporte) {
+                        case "Tenis":  imgNombre = "pista_tenis";  break;
+                        case "Pádel":
+                        case "Padel":  imgNombre = "pista_padel";  break;
+                        default:       imgNombre = "pista_baloncesto_1"; break;
+                    }
+                }
+
                 ReservationModel res = new ReservationModel(
-                        0L, pistaNombre, timeStr, imgNombre, estado);
+                        0L, pistaNombre, timeStr, imgNombre, estado,
+                        pistaId, imagenUrl, direccion, tipoDeporte,
+                        fecha, horaInicio, horaFin, precio);
 
                 if ("Confirmada".equalsIgnoreCase(estado)
                         || "Pendiente".equalsIgnoreCase(estado)) {
@@ -165,10 +193,37 @@ public class ProfileActivity extends AppCompatActivity {
         btnPasadas.setTextColor(Color.BLACK);
 
         List<ReservationModel> data = active ? activeList : pastList;
-        adapter = new ReservationAdapter(data, position -> {
-            if (active) cancelarReserva(data.get(position));
-        });
+        adapter = new ReservationAdapter(data,
+                position -> {
+                    if (active) cancelarReserva(data.get(position));
+                },
+                position -> abrirDetalles(data.get(position))
+        );
         rv.setAdapter(adapter);
+    }
+
+    private void abrirDetalles(ReservationModel reserva) {
+        Intent intent = new Intent(this, ConfirmacionReservaActivity.class);
+        intent.putExtra("pista_nombre", reserva.getFacilityName());
+        intent.putExtra("tipo_deporte", reserva.getTipoDeporte());
+        intent.putExtra("fecha",        reserva.getFecha());
+        intent.putExtra("hora_inicio",  reserva.getHoraInicio());
+        intent.putExtra("hora_fin",     reserva.getHoraFin());
+        intent.putExtra("precio",       reserva.getPrecio());
+        intent.putExtra("imagen_url",   reserva.getImagenUrl());
+        intent.putExtra("direccion",    reserva.getDireccion());
+        intent.putExtra("imagen_res",   getImagenRes(reserva.getTipoDeporte()));
+        startActivity(intent);
+    }
+
+    private int getImagenRes(String deporte) {
+        if (deporte == null) return R.drawable.pista_baloncesto_1;
+        switch (deporte) {
+            case "Tenis":  return R.drawable.pista_tenis;
+            case "Pádel":
+            case "Padel":  return R.drawable.pista_padel;
+            default:       return R.drawable.pista_baloncesto_1;
+        }
     }
 
     private void cancelarReserva(ReservationModel reserva) {
