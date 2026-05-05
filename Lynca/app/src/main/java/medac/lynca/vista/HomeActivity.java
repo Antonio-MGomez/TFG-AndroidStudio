@@ -39,12 +39,9 @@ public class HomeActivity extends AppCompatActivity {
 
         SessionManager session = SessionManager.getInstance(this);
 
-        // Nombre de bienvenida
-        String nombre = session.getNombre();
         TextView tvUserName = findViewById(R.id.tvUserName);
-        tvUserName.setText(nombre + "!");
+        tvUserName.setText(session.getNombre() + "!");
 
-        // Foto de perfil circular → va al perfil al hacer clic
         ImageView imgFotoPerfil = findViewById(R.id.imgFotoPerfil);
         if (imgFotoPerfil != null) {
             cargarFotoPerfil(imgFotoPerfil, session.getPerfilId());
@@ -52,7 +49,6 @@ public class HomeActivity extends AppCompatActivity {
                     startActivity(new Intent(this, PerfilActivity.class)));
         }
 
-        // Botones
         findViewById(R.id.btnBookNow).setOnClickListener(v -> {
             if (!popularItems.isEmpty()) abrirPista(popularItems.get(0));
         });
@@ -62,7 +58,6 @@ public class HomeActivity extends AppCompatActivity {
         findViewById(R.id.btnSearch).setOnClickListener(v ->
                 startActivity(new Intent(this, SearchActivity.class)));
 
-        // RecyclerView
         RecyclerView rv = findViewById(R.id.rvPopular);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setNestedScrollingEnabled(false);
@@ -74,7 +69,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Foto de perfil circular desde Supabase
+    //  Foto de perfil circular
     // ════════════════════════════════════════════════════════════
     private void cargarFotoPerfil(ImageView imgView, String perfilId) {
         if (perfilId == null) {
@@ -136,7 +131,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Cargar pistas desde Supabase
+    //  Cargar pistas solo desde Supabase
     // ════════════════════════════════════════════════════════════
     private void cargarPistas() {
         SupabaseClient.getInstance().getPistasConImagenes(
@@ -179,6 +174,7 @@ public class HomeActivity extends AppCompatActivity {
                                                 .optString("url_imagen","");
                                     }
                                 }
+
                                 popularItems.add(new PopularItem(
                                         id, nombre, deporte,
                                         (int) precio, imgUrl, desc, direccion));
@@ -198,26 +194,18 @@ public class HomeActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                        } catch (Exception e) { cargarLocal(); }
+                        } catch (Exception e) {
+                            popularItems.clear();
+                            popularAdapter.notifyDataSetChanged();
+                        }
                     }
 
                     @Override
-                    public void onError(String error) { cargarLocal(); }
+                    public void onError(String error) {
+                        popularItems.clear();
+                        popularAdapter.notifyDataSetChanged();
+                    }
                 });
-    }
-
-    private void cargarLocal() {
-        popularItems.clear();
-        popularItems.add(new PopularItem(
-                "09b0e24c-79db-482a-8cf2-2c33a3e1dddf",
-                "Pista Tenis", "Tenis", 12, "", "", ""));
-        popularItems.add(new PopularItem(
-                "99a95eae-e5cb-49f5-8475-43a659a1fd4a",
-                "Pista Padel 1", "Padel", 10, "", "", ""));
-        popularItems.add(new PopularItem(
-                "eb1707df-023f-4353-ad4c-3a6ebb27f0de",
-                "Pista Futbol Sala", "Futbol Sala", 10, "", "", ""));
-        popularAdapter.notifyDataSetChanged();
     }
 
     private void abrirPista(PopularItem item) {

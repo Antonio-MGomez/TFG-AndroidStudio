@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,19 +50,29 @@ public class SearchActivity extends AppCompatActivity {
     private PistaAdapter adapter;
     private String activeChip = "Todos";
 
+    private EditText etSearch;
+    private EditText etLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         LanguageHelper.applyOnCreate(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
+        etSearch   = findViewById(R.id.etSearch);
+        etLocation = findViewById(R.id.etLocation);
+
         setupRecyclerView();
         setupSearch();
+        setupLocationSearch();
         setupChips();
         BottomNavHelper.setup(this, "search");
         cargarPistas();
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Cargar pistas desde Supabase
+    // ════════════════════════════════════════════════════════════
     private void cargarPistas() {
         SupabaseClient.getInstance().getPistasConImagenes(
                 new SupabaseClient.Callback() {
@@ -71,9 +80,9 @@ public class SearchActivity extends AppCompatActivity {
                     public void onSuccess(String body) { parsearPistas(body); }
                     @Override
                     public void onError(String error) {
-                        Toast.makeText(SearchActivity.this,
-                                "Error cargando pistas", Toast.LENGTH_SHORT).show();
-                        cargarPistasLocal();
+                        allPistas.clear();
+                        filtered.clear();
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }
@@ -90,7 +99,6 @@ public class SearchActivity extends AppCompatActivity {
                 double precio  = pista.optDouble("precio_hora", 0);
                 String desc    = pista.optString("descripcion", "");
 
-                // Dirección desde instalaciones
                 String direccion = "";
                 if (pista.has("instalaciones")
                         && !pista.isNull("instalaciones")) {
@@ -101,7 +109,6 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
 
-                // Imagen principal
                 String imagenUrl = "";
                 if (pista.has("imagenes_pista")) {
                     JSONArray imgs = pista.getJSONArray("imagenes_pista");
@@ -123,33 +130,16 @@ public class SearchActivity extends AppCompatActivity {
                         imagenUrl, desc, direccion));
             }
         } catch (Exception e) {
-            cargarPistasLocal();
-            return;
+            allPistas.clear();
         }
         filtered.clear();
         filtered.addAll(allPistas);
         adapter.notifyDataSetChanged();
     }
 
-    private void cargarPistasLocal() {
-        allPistas.clear();
-        allPistas.add(new PistaItem(
-                "09b0e24c-79db-482a-8cf2-2c33a3e1dddf",
-                "Pista Tenis", "Tenis", 12, "", "", ""));
-        allPistas.add(new PistaItem(
-                "99a95eae-e5cb-49f5-8475-43a659a1fd4a",
-                "Pista Pádel 1", "Pádel", 10, "", "", ""));
-        allPistas.add(new PistaItem(
-                "d3304f3d-c511-41fd-a65f-027566151951",
-                "Pista Pádel 2", "Pádel", 8, "", "", ""));
-        allPistas.add(new PistaItem(
-                "eb1707df-023f-4353-ad4c-3a6ebb27f0de",
-                "Pista Fútbol Sala", "Fútbol Sala", 10, "", "", ""));
-        filtered.clear();
-        filtered.addAll(allPistas);
-        adapter.notifyDataSetChanged();
-    }
-
+    // ════════════════════════════════════════════════════════════
+    //  RecyclerView
+    // ════════════════════════════════════════════════════════════
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvFacilities);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -157,17 +147,35 @@ public class SearchActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Buscador por nombre
+    // ════════════════════════════════════════════════════════════
     private void setupSearch() {
-        EditText etSearch = findViewById(R.id.etSearch);
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s,int a,int b,int c){}
             @Override public void onTextChanged(CharSequence s,int a,int b,int c){
-                applyFilters(s.toString());
+                applyFilters();
             }
             @Override public void afterTextChanged(Editable s){}
         });
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Buscador por ubicación
+    // ════════════════════════════════════════════════════════════
+    private void setupLocationSearch() {
+        etLocation.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s,int a,int b,int c){}
+            @Override public void onTextChanged(CharSequence s,int a,int b,int c){
+                applyFilters();
+            }
+            @Override public void afterTextChanged(Editable s){}
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Chips de deporte
+    // ════════════════════════════════════════════════════════════
     private void setupChips() {
         int[] chipIds = {
                 R.id.chipTodos, R.id.chipTenis, R.id.chipPadel,
@@ -185,8 +193,7 @@ public class SearchActivity extends AppCompatActivity {
             chip.setOnClickListener(v -> {
                 activeChip = deporte;
                 updateChipStyles(chipIds, selectedId);
-                applyFilters(((EditText) findViewById(R.id.etSearch))
-                        .getText().toString());
+                applyFilters();
             });
         }
     }
@@ -205,20 +212,38 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    private void applyFilters(String query) {
+    // ════════════════════════════════════════════════════════════
+    //  Aplicar todos los filtros juntos
+    // ════════════════════════════════════════════════════════════
+    private void applyFilters() {
+        String queryNombre   = etSearch.getText().toString().trim().toLowerCase();
+        String queryLocation = etLocation.getText().toString().trim().toLowerCase();
+
         filtered.clear();
         for (PistaItem p : allPistas) {
+
+            // Filtro deporte
             boolean matchSport = activeChip.equals("Todos")
                     || p.tipoDeporte.equalsIgnoreCase(activeChip);
-            boolean matchQuery = query.isEmpty()
-                    || p.nombre.toLowerCase().contains(query.toLowerCase())
-                    || p.tipoDeporte.toLowerCase().contains(query.toLowerCase())
-                    || p.direccion.toLowerCase().contains(query.toLowerCase());
-            if (matchSport && matchQuery) filtered.add(p);
+
+            // Filtro nombre
+            boolean matchNombre = queryNombre.isEmpty()
+                    || p.nombre.toLowerCase().contains(queryNombre)
+                    || p.tipoDeporte.toLowerCase().contains(queryNombre);
+
+            // Filtro ubicación
+            boolean matchLocation = queryLocation.isEmpty()
+                    || (p.direccion != null
+                    && p.direccion.toLowerCase().contains(queryLocation));
+
+            if (matchSport && matchNombre && matchLocation) filtered.add(p);
         }
         adapter.notifyDataSetChanged();
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Abrir pista
+    // ════════════════════════════════════════════════════════════
     private void abrirPista(PistaItem p) {
         Intent intent = new Intent(this, PistaInfoActivity.class);
         intent.putExtra("pista_id",     p.id);
@@ -242,6 +267,9 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Adapter
+    // ════════════════════════════════════════════════════════════
     class PistaAdapter extends RecyclerView.Adapter<PistaAdapter.VH> {
 
         private final List<PistaItem> list;

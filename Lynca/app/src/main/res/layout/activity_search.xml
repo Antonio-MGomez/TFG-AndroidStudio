@@ -10,6 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- HEADER -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,6 +30,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="14dp"/>
 
+            <!-- BUSCADOR POR NOMBRE -->
             <EditText
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
@@ -43,13 +45,31 @@
                 android:imeOptions="actionSearch"
                 android:textSize="14sp"
                 android:textColor="#111827"
-                android:textColorHint="#6B7280"/>
+                android:textColorHint="#6B7280"
+                android:layout_marginBottom="10dp"/>
 
+            <!-- BUSCADOR POR UBICACIÓN -->
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_search_bar"
+                android:hint="📍 Filtrar por ubicación (ej: Alicante)"
+                android:drawablePadding="8dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:textSize="14sp"
+                android:textColor="#111827"
+                android:textColorHint="#6B7280"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- CHIPS DEPORTE -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:layout_marginTop="12dp">
+                android:scrollbars="none">
 
                 <LinearLayout
                     android:id="@+id/llSportChips"
@@ -69,7 +89,7 @@
 
                     <TextView android:id="@+id/chipTenis"
                         android:layout_width="wrap_content" android:layout_height="36dp"
-                        android:text="Tenis" android:gravity="center"
+                        android:text="🎾 Tenis" android:gravity="center"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:background="@drawable/bg_chip_normal"
                         android:textColor="#111827" android:textSize="13sp"
@@ -78,7 +98,7 @@
 
                     <TextView android:id="@+id/chipPadel"
                         android:layout_width="wrap_content" android:layout_height="36dp"
-                        android:text="Padel" android:gravity="center"
+                        android:text="🏓 Padel" android:gravity="center"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:background="@drawable/bg_chip_normal"
                         android:textColor="#111827" android:textSize="13sp"
@@ -87,7 +107,7 @@
 
                     <TextView android:id="@+id/chipFutbol"
                         android:layout_width="wrap_content" android:layout_height="36dp"
-                        android:text="Futbol" android:gravity="center"
+                        android:text="⚽ Fútbol" android:gravity="center"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:background="@drawable/bg_chip_normal"
                         android:textColor="#111827" android:textSize="13sp"
@@ -96,7 +116,7 @@
 
                     <TextView android:id="@+id/chipBaloncesto"
                         android:layout_width="wrap_content" android:layout_height="36dp"
-                        android:text="Baloncesto" android:gravity="center"
+                        android:text="🏀 Basket" android:gravity="center"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:background="@drawable/bg_chip_normal"
                         android:textColor="#111827" android:textSize="13sp"
@@ -105,8 +125,10 @@
 
                 </LinearLayout>
             </HorizontalScrollView>
+
         </LinearLayout>
 
+        <!-- LISTA DE PISTAS -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvFacilities"
             android:layout_width="match_parent"
@@ -115,6 +137,7 @@
             android:padding="16dp"
             android:clipToPadding="false"/>
 
+        <!-- BOTTOM NAV -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"

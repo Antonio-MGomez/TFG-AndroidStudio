@@ -2,9 +2,11 @@ package medac.lynca.vista;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -54,15 +56,21 @@ public class PistaInfoActivity extends AppCompatActivity {
             }
         }
 
-        // Dirección
+        // Dirección con click a Google Maps
         String direccion = getIntent().getStringExtra("direccion");
         TextView tvDireccion = findViewById(R.id.tvDireccion);
         if (tvDireccion != null) {
             if (direccion != null && !direccion.isEmpty()) {
                 tvDireccion.setText("📍 " + direccion);
-                tvDireccion.setVisibility(android.view.View.VISIBLE);
+                tvDireccion.setVisibility(View.VISIBLE);
+                tvDireccion.setClickable(true);
+                tvDireccion.setFocusable(true);
+                tvDireccion.setPaintFlags(tvDireccion.getPaintFlags()
+                        | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+                final String dir = direccion;
+                tvDireccion.setOnClickListener(v -> abrirEnMaps(dir));
             } else {
-                tvDireccion.setVisibility(android.view.View.GONE);
+                tvDireccion.setVisibility(View.GONE);
             }
         }
 
@@ -88,10 +96,35 @@ public class PistaInfoActivity extends AppCompatActivity {
             intent.putExtra("precio_hora",  precioHora);
             intent.putExtra("imagen_res",   imagenRes);
             intent.putExtra("imagen_url",   imagenUrl);
+            intent.putExtra("direccion",    direccion);
             startActivity(intent);
         });
 
         BottomNavHelper.setup(this, "search");
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Abrir Google Maps
+    // ════════════════════════════════════════════════════════════
+    private void abrirEnMaps(String direccion) {
+        try {
+            String query = android.net.Uri.encode(direccion);
+            android.net.Uri uri = android.net.Uri.parse(
+                    "geo:0,0?q=" + query);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                android.net.Uri webUri = android.net.Uri.parse(
+                        "https://maps.google.com/?q=" + query);
+                startActivity(new Intent(Intent.ACTION_VIEW, webUri));
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "No se pudo abrir el mapa",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     // ════════════════════════════════════════════════════════════

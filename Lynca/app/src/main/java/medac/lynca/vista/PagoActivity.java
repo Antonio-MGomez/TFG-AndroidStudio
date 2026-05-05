@@ -2,6 +2,7 @@ package medac.lynca.vista;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,10 +21,13 @@ import medac.lynca.modelo.SupabaseClient;
 
 public class PagoActivity extends AppCompatActivity {
 
-    private static final int METODO_NINGUNO      = 0;
-    private static final int METODO_GOOGLE_PAY   = 1;
-    private static final int METODO_PAYPAL       = 2;
-    private static final int METODO_TARJETA      = 3;
+    private static final String TAG = "PAGO_ERROR";
+
+    private static final int METODO_NINGUNO    = 0;
+    private static final int METODO_EFECTIVO   = 1;
+    private static final int METODO_GOOGLE_PAY = 2;
+    private static final int METODO_PAYPAL     = 3;
+    private static final int METODO_TARJETA    = 4;
 
     private int metodoSeleccionado = METODO_NINGUNO;
 
@@ -31,7 +35,6 @@ public class PagoActivity extends AppCompatActivity {
     private EditText etNumeroTarjeta, etCaducidad, etCvv, etNombreTarjeta;
     private Button   btnPagar;
 
-    // Datos de la reserva
     private String pistaNombre, tipoDeporte, fecha;
     private String horaInicio, horaFin, precio;
     private String imagenUrl, direccion, pistaId;
@@ -44,7 +47,6 @@ public class PagoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pago);
 
-        // Recoger datos del intent
         pistaNombre = getIntent().getStringExtra("pista_nombre");
         tipoDeporte = getIntent().getStringExtra("tipo_deporte");
         fecha       = getIntent().getStringExtra("fecha");
@@ -57,11 +59,9 @@ public class PagoActivity extends AppCompatActivity {
         imagenRes   = getIntent().getIntExtra("imagen_res",
                 R.drawable.pista_baloncesto_1);
 
-        try {
-            precioFinal = Integer.parseInt(precio);
-        } catch (Exception e) { precioFinal = 0; }
+        try { precioFinal = Integer.parseInt(precio); }
+        catch (Exception e) { precioFinal = 0; }
 
-        // Vistas
         layoutTarjeta   = findViewById(R.id.layoutTarjeta);
         etNumeroTarjeta = findViewById(R.id.etNumeroTarjeta);
         etCaducidad     = findViewById(R.id.etCaducidad);
@@ -75,10 +75,14 @@ public class PagoActivity extends AppCompatActivity {
         TextView tvHora   = findViewById(R.id.tvPagoHora);
         TextView tvPrecio = findViewById(R.id.tvPagoPrecio);
 
-        if (tvNombre != null) tvNombre.setText(pistaNombre);
-        if (tvPrecio != null) tvPrecio.setText("€" + precio);
-        if (tvHora   != null) tvHora.setText(horaInicio + " - " + horaFin);
-        if (tvFecha  != null) {
+        if (tvNombre != null) tvNombre.setText(
+                pistaNombre != null ? pistaNombre : "--");
+        if (tvPrecio != null) tvPrecio.setText(
+                "€" + (precio != null ? precio : "0"));
+        if (tvHora != null) tvHora.setText(
+                (horaInicio != null ? horaInicio : "--")
+                        + " - " + (horaFin != null ? horaFin : "--"));
+        if (tvFecha != null) {
             if (fecha != null && fecha.contains("-")) {
                 try {
                     String[] p = fecha.split("-");
@@ -93,66 +97,70 @@ public class PagoActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        // Selección método de pago
-        CardView cardGoogle  = findViewById(R.id.cardGooglePay);
-        CardView cardPaypal  = findViewById(R.id.cardPaypal);
-        CardView cardTarjeta = findViewById(R.id.cardTarjeta);
+        // Métodos de pago
+        CardView cardEfectivo = findViewById(R.id.cardEfectivo);
+        CardView cardGoogle   = findViewById(R.id.cardGooglePay);
+        CardView cardPaypal   = findViewById(R.id.cardPaypal);
+        CardView cardTarjeta  = findViewById(R.id.cardTarjeta);
 
-        if (cardGoogle  != null) cardGoogle.setOnClickListener(v ->
+        if (cardEfectivo != null) cardEfectivo.setOnClickListener(v ->
+                seleccionarMetodo(METODO_EFECTIVO));
+        if (cardGoogle != null) cardGoogle.setOnClickListener(v ->
                 seleccionarMetodo(METODO_GOOGLE_PAY));
-        if (cardPaypal  != null) cardPaypal.setOnClickListener(v ->
+        if (cardPaypal != null) cardPaypal.setOnClickListener(v ->
                 seleccionarMetodo(METODO_PAYPAL));
         if (cardTarjeta != null) cardTarjeta.setOnClickListener(v ->
                 seleccionarMetodo(METODO_TARJETA));
 
-        // Botón pagar
         btnPagar.setOnClickListener(v -> procesarPago());
     }
 
     // ════════════════════════════════════════════════════════════
-    //  Seleccionar método de pago
+    //  Seleccionar método
     // ════════════════════════════════════════════════════════════
     private void seleccionarMetodo(int metodo) {
         metodoSeleccionado = metodo;
-
-        // Resetear estilos
         resetCards();
 
-        // Marcar seleccionado
         switch (metodo) {
-            case METODO_GOOGLE_PAY:
-                destacarCard(R.id.cardGooglePay, R.id.radioGooglePay);
+            case METODO_EFECTIVO:
+                destacarCard(R.id.cardEfectivo);
                 layoutTarjeta.setVisibility(View.GONE);
+                btnPagar.setText("Reservar y pagar en efectivo");
+                break;
+            case METODO_GOOGLE_PAY:
+                destacarCard(R.id.cardGooglePay);
+                layoutTarjeta.setVisibility(View.GONE);
+                btnPagar.setText("Pagar con Google Pay");
                 break;
             case METODO_PAYPAL:
-                destacarCard(R.id.cardPaypal, R.id.radioPaypal);
+                destacarCard(R.id.cardPaypal);
                 layoutTarjeta.setVisibility(View.GONE);
+                btnPagar.setText("Pagar con PayPal");
                 break;
             case METODO_TARJETA:
-                destacarCard(R.id.cardTarjeta, R.id.radioTarjeta);
+                destacarCard(R.id.cardTarjeta);
                 layoutTarjeta.setVisibility(View.VISIBLE);
+                btnPagar.setText("Pagar con tarjeta");
                 break;
         }
     }
 
     private void resetCards() {
-        int[] cardIds  = {R.id.cardGooglePay, R.id.cardPaypal, R.id.cardTarjeta};
-        int[] radioIds = {R.id.radioGooglePay, R.id.radioPaypal, R.id.radioTarjeta};
-        for (int i = 0; i < cardIds.length; i++) {
-            CardView card = findViewById(cardIds[i]);
-            if (card != null) {
-                card.setCardBackgroundColor(
-                        getColor(android.R.color.white));
-            }
+        int[] cardIds = {
+                R.id.cardEfectivo, R.id.cardGooglePay,
+                R.id.cardPaypal,   R.id.cardTarjeta
+        };
+        for (int id : cardIds) {
+            CardView card = findViewById(id);
+            if (card != null) card.setCardBackgroundColor(
+                    getColor(android.R.color.white));
         }
     }
 
-    private void destacarCard(int cardId, int radioId) {
+    private void destacarCard(int cardId) {
         CardView card = findViewById(cardId);
-        if (card != null) {
-            card.setCardBackgroundColor(
-                    getColor(android.R.color.holo_blue_light));
-        }
+        if (card != null) card.setCardBackgroundColor(0xFFE8F0FE);
     }
 
     // ════════════════════════════════════════════════════════════
@@ -172,8 +180,11 @@ public class PagoActivity extends AppCompatActivity {
         btnPagar.setEnabled(false);
         btnPagar.setText("Procesando...");
 
-        // Simular proceso de pago
-        btnPagar.postDelayed(() -> guardarReserva(), 1500);
+        if (metodoSeleccionado == METODO_EFECTIVO) {
+            guardarReserva();
+        } else {
+            btnPagar.postDelayed(this::guardarReserva, 1500);
+        }
     }
 
     private boolean validarTarjeta() {
@@ -183,20 +194,16 @@ public class PagoActivity extends AppCompatActivity {
         String nombre = etNombreTarjeta.getText().toString().trim();
 
         if (numero.length() < 16) {
-            etNumeroTarjeta.setError("Número de tarjeta inválido");
-            return false;
+            etNumeroTarjeta.setError("Número de tarjeta inválido"); return false;
         }
         if (cad.length() < 4) {
-            etCaducidad.setError("Fecha inválida");
-            return false;
+            etCaducidad.setError("Fecha inválida"); return false;
         }
         if (cvv.length() < 3) {
-            etCvv.setError("CVV inválido");
-            return false;
+            etCvv.setError("CVV inválido"); return false;
         }
         if (nombre.isEmpty()) {
-            etNombreTarjeta.setError("Introduce el nombre");
-            return false;
+            etNombreTarjeta.setError("Introduce el nombre"); return false;
         }
         return true;
     }
@@ -210,8 +217,18 @@ public class PagoActivity extends AppCompatActivity {
 
         if (perfilId == null) {
             btnPagar.setEnabled(true);
-            btnPagar.setText("Pagar ahora");
+            btnPagar.setText("Confirmar reserva");
             startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+
+        if (pistaId == null || fecha == null
+                || horaInicio == null || horaFin == null) {
+            btnPagar.setEnabled(true);
+            btnPagar.setText("Confirmar reserva");
+            Toast.makeText(this,
+                    "Error: datos incompletos. Vuelve a intentarlo.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -223,16 +240,17 @@ public class PagoActivity extends AppCompatActivity {
             reserva.put("hora_inicio",    horaInicio + ":00");
             reserva.put("hora_fin",       horaFin + ":00");
             reserva.put("estado_reserva", "Confirmada");
-            reserva.put("precio_total",   precioFinal);
+
+            Log.d(TAG, "JSON: " + reserva.toString());
 
             SupabaseClient.getInstance().insertReserva(reserva,
                     new SupabaseClient.Callback() {
                         @Override
                         public void onSuccess(String body) {
+                            Log.d(TAG, "OK: " + body);
                             btnPagar.setEnabled(true);
-                            btnPagar.setText("Pagar ahora");
+                            btnPagar.setText("Confirmar reserva");
 
-                            // Ir a confirmación
                             Intent intent = new Intent(PagoActivity.this,
                                     ConfirmacionReservaActivity.class);
                             intent.putExtra("pista_nombre", pistaNombre);
@@ -251,18 +269,21 @@ public class PagoActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String error) {
+                            Log.e(TAG, "Error: " + error);
                             btnPagar.setEnabled(true);
-                            btnPagar.setText("Pagar ahora");
+                            btnPagar.setText("Confirmar reserva");
                             Toast.makeText(PagoActivity.this,
-                                    "Error al procesar el pago: " + error,
+                                    "Error: " + error,
                                     Toast.LENGTH_LONG).show();
                         }
                     });
         } catch (Exception e) {
+            Log.e(TAG, "Excepcion: " + e.getMessage());
             btnPagar.setEnabled(true);
-            btnPagar.setText("Pagar ahora");
-            Toast.makeText(this, "Error inesperado",
-                    Toast.LENGTH_SHORT).show();
+            btnPagar.setText("Confirmar reserva");
+            Toast.makeText(this,
+                    "Error: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
         }
     }
 }
